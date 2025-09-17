@@ -1,0 +1,114 @@
+{{define "content"}}
+<h1>Dashboard</h1>
+
+<!-- Context Status Bar -->
+<div class="card" style="margin-bottom: 2rem;">
+    <h2>Current Life Contexts</h2>
+    <div id="context-status-bar" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+        <!-- Context status indicators will be loaded here -->
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="card">
+        <h2>Recent Projects</h2>
+        <div id="recent-projects">Loading...</div>
+    </div>
+    
+    <div class="card">
+        <h2>Active Goals</h2>
+        <div id="active-goals">Loading...</div>
+    </div>
+    
+    <div class="card">
+        <h2>Pending Tasks</h2>
+        <div id="pending-tasks">Loading...</div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Quick Actions</h2>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="/projects/new" class="btn">New Project</a>
+        <a href="/goals/new" class="btn">New Goal</a>
+        <a href="/tasks/new" class="btn">New Task</a>
+        <a href="/contexts" class="btn">Manage Contexts</a>
+        <a href="/notes/new" class="btn">New Note</a>
+    </div>
+</div>
+
+<script>
+async function loadDashboardData() {
+    try {
+        // Load active contexts
+        const contextsResponse = await fetch('/api/v1/contexts');
+        const contexts = await contextsResponse.json();
+        const activeContexts = contexts.filter(c => c.status === 'active');
+        
+        document.getElementById('context-status-bar').innerHTML = activeContexts.length > 0
+            ? activeContexts.map(c => `
+                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 20px; background: ${c.color}20; border: 2px solid ${c.color};">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: ${c.color};"></div>
+                    <span style="font-weight: 500; color: ${c.color};">${c.title}</span>
+                </div>
+              `).join('')
+            : '<p style="color: #666;">No active contexts. <a href="/contexts" style="color: #2563eb;">Create one</a></p>';
+        
+        // Load recent projects
+        const projectsResponse = await fetch('/api/v1/projects');
+        const projects = await projectsResponse.json();
+        const recentProjects = projects.slice(0, 5);
+        
+        document.getElementById('recent-projects').innerHTML = recentProjects.length > 0 
+            ? recentProjects.map(p => `
+                <div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <strong>${p.title}</strong>
+                    <span class="status status-${p.status}">${p.status}</span>
+                    ${p.contextId ? `<div style="width: 8px; height: 8px; border-radius: 50%; background: ${getContextColor(p.contextId, contexts)};"></div>` : ''}
+                </div>
+              `).join('')
+            : '<p>No projects yet</p>';
+        
+        // Load active goals
+        const goalsResponse = await fetch('/api/v1/goals');
+        const goals = await goalsResponse.json();
+        const activeGoals = goals.filter(g => g.status === 'active').slice(0, 5);
+        
+        document.getElementById('active-goals').innerHTML = activeGoals.length > 0
+            ? activeGoals.map(g => `
+                <div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <strong>${g.title}</strong>
+                    <span class="priority priority-${g.priority}">P${g.priority}</span>
+                    ${g.contextId ? `<div style="width: 8px; height: 8px; border-radius: 50%; background: ${getContextColor(g.contextId, contexts)};"></div>` : ''}
+                </div>
+              `).join('')
+            : '<p>No active goals</p>';
+        
+        // Load pending tasks
+        const tasksResponse = await fetch('/api/v1/tasks');
+        const tasks = await tasksResponse.json();
+        const pendingTasks = tasks.filter(t => t.status === 'pending').slice(0, 5);
+        
+        document.getElementById('pending-tasks').innerHTML = pendingTasks.length > 0
+            ? pendingTasks.map(t => `
+                <div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <strong>${t.title}</strong>
+                    <span class="priority priority-${t.priority}">P${t.priority}</span>
+                    ${t.contextId ? `<div style="width: 8px; height: 8px; border-radius: 50%; background: ${getContextColor(t.contextId, contexts)};"></div>` : ''}
+                </div>
+              `).join('')
+            : '<p>No pending tasks</p>';
+            
+    } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+    }
+}
+
+function getContextColor(contextId, contexts) {
+    const context = contexts.find(c => c.id === contextId);
+    return context ? context.color : '#666666';
+}
+
+loadDashboardData();
+</script>
+{{end}}
