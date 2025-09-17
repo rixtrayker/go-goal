@@ -1,0 +1,312 @@
+scalar Time
+
+type Project {
+  id: ID!
+  title: String!
+  description: String
+  status: String!
+  workspaceId: Int!
+  contextId: Int
+  createdAt: Time!
+  updatedAt: Time!
+  goals: [Goal!]
+  tasks: [Task!]
+  notes: [Note!]
+  tags: [Tag!]
+  context: Context
+}
+
+type Goal {
+  id: ID!
+  title: String!
+  description: String
+  priority: String!
+  dueDate: Time
+  status: String!
+  projectId: Int!
+  contextId: Int
+  createdAt: Time!
+  updatedAt: Time!
+  project: Project!
+  tasks: [Task!]
+  notes: [Note!]
+  tags: [Tag!]
+  context: Context
+}
+
+type Task {
+  id: ID!
+  title: String!
+  description: String
+  status: String!
+  priority: String!
+  dueDate: Time
+  goalId: Int
+  projectId: Int!
+  contextId: Int
+  createdAt: Time!
+  updatedAt: Time!
+  goal: Goal
+  project: Project!
+  notes: [Note!]
+  tags: [Tag!]
+  context: Context
+}
+
+type Tag {
+  id: ID!
+  name: String!
+  color: String!
+  parentId: Int
+  createdAt: Time!
+  updatedAt: Time!
+  parent: Tag
+  children: [Tag!]
+  projects: [Project!]
+  goals: [Goal!]
+  tasks: [Task!]
+  notes: [Note!]
+}
+
+type Note {
+  id: ID!
+  title: String!
+  content: String!
+  entityType: String!
+  entityId: Int!
+  createdAt: Time!
+  updatedAt: Time!
+  tags: [Tag!]
+}
+
+type Workspace {
+  id: ID!
+  name: String!
+  description: String
+  createdAt: Time!
+  updatedAt: Time!
+  projects: [Project!]
+  contexts: [Context!]
+}
+
+type Context {
+  id: ID!
+  title: String!
+  description: String
+  color: String!
+  status: String!
+  startDate: Time
+  endDate: Time
+  parentId: Int
+  workspaceId: Int!
+  createdAt: Time!
+  updatedAt: Time!
+  parent: Context
+  children: [Context!]
+  projects: [Project!]
+  goals: [Goal!]
+  tasks: [Task!]
+}
+
+type Query {
+  # Project queries
+  projects(workspaceId: Int): [Project!]!
+  project(id: ID!): Project
+  
+  # Goal queries
+  goals(projectId: Int): [Goal!]!
+  goal(id: ID!): Goal
+  
+  # Task queries
+  tasks(projectId: Int, goalId: Int, status: String): [Task!]!
+  task(id: ID!): Task
+  
+  # Tag queries
+  tags(parentId: Int): [Tag!]!
+  tag(id: ID!): Tag
+  
+  # Note queries
+  notes(entityType: String, entityId: Int): [Note!]!
+  note(id: ID!): Note
+  
+  # Workspace queries
+  workspaces: [Workspace!]!
+  workspace(id: ID!): Workspace
+  
+  # Context queries
+  contexts(workspaceId: Int): [Context!]!
+  context(id: ID!): Context
+  
+  # Dashboard queries
+  dashboard(workspaceId: Int): Dashboard!
+}
+
+type Dashboard {
+  todayTasks: [Task!]!
+  recentProjects: [Project!]!
+  upcomingGoals: [Goal!]!
+  workspaceStats: WorkspaceStats!
+}
+
+type WorkspaceStats {
+  totalProjects: Int!
+  totalGoals: Int!
+  totalTasks: Int!
+  completedTasks: Int!
+  pendingTasks: Int!
+}
+
+type Mutation {
+  # Project mutations
+  createProject(input: CreateProjectInput!): Project!
+  updateProject(id: ID!, input: UpdateProjectInput!): Project!
+  deleteProject(id: ID!): Boolean!
+  
+  # Goal mutations
+  createGoal(input: CreateGoalInput!): Goal!
+  updateGoal(id: ID!, input: UpdateGoalInput!): Goal!
+  deleteGoal(id: ID!): Boolean!
+  
+  # Task mutations
+  createTask(input: CreateTaskInput!): Task!
+  updateTask(id: ID!, input: UpdateTaskInput!): Task!
+  deleteTask(id: ID!): Boolean!
+  
+  # Tag mutations
+  createTag(input: CreateTagInput!): Tag!
+  updateTag(id: ID!, input: UpdateTagInput!): Tag!
+  deleteTag(id: ID!): Boolean!
+  
+  # Note mutations
+  createNote(input: CreateNoteInput!): Note!
+  updateNote(id: ID!, input: UpdateNoteInput!): Note!
+  deleteNote(id: ID!): Boolean!
+  
+  # Workspace mutations
+  createWorkspace(input: CreateWorkspaceInput!): Workspace!
+  updateWorkspace(id: ID!, input: UpdateWorkspaceInput!): Workspace!
+  deleteWorkspace(id: ID!): Boolean!
+  
+  # Context mutations
+  createContext(input: CreateContextInput!): Context!
+  updateContext(id: ID!, input: UpdateContextInput!): Context!
+  deleteContext(id: ID!): Boolean!
+  
+  # Tagging mutations
+  assignTag(entityType: String!, entityId: Int!, tagId: Int!): Boolean!
+  removeTag(entityType: String!, entityId: Int!, tagId: Int!): Boolean!
+}
+
+input CreateProjectInput {
+  title: String!
+  description: String
+  status: String!
+  workspaceId: Int!
+  contextId: Int
+}
+
+input UpdateProjectInput {
+  title: String
+  description: String
+  status: String
+  workspaceId: Int
+  contextId: Int
+}
+
+input CreateGoalInput {
+  title: String!
+  description: String
+  priority: String!
+  dueDate: Time
+  status: String!
+  projectId: Int!
+  contextId: Int
+}
+
+input UpdateGoalInput {
+  title: String
+  description: String
+  priority: String
+  dueDate: Time
+  status: String
+  projectId: Int
+  contextId: Int
+}
+
+input CreateTaskInput {
+  title: String!
+  description: String
+  status: String!
+  priority: String!
+  dueDate: Time
+  goalId: Int
+  projectId: Int!
+  contextId: Int
+}
+
+input UpdateTaskInput {
+  title: String
+  description: String
+  status: String
+  priority: String
+  dueDate: Time
+  goalId: Int
+  projectId: Int
+  contextId: Int
+}
+
+input CreateTagInput {
+  name: String!
+  color: String!
+  parentId: Int
+}
+
+input UpdateTagInput {
+  name: String
+  color: String
+  parentId: Int
+}
+
+input CreateNoteInput {
+  title: String!
+  content: String!
+  entityType: String!
+  entityId: Int!
+}
+
+input UpdateNoteInput {
+  title: String
+  content: String
+}
+
+input CreateWorkspaceInput {
+  name: String!
+  description: String
+}
+
+input UpdateWorkspaceInput {
+  name: String
+  description: String
+}
+
+input CreateContextInput {
+  title: String!
+  description: String
+  color: String!
+  status: String!
+  startDate: Time
+  endDate: Time
+  parentId: Int
+  workspaceId: Int!
+}
+
+input UpdateContextInput {
+  title: String
+  description: String
+  color: String
+  status: String
+  startDate: Time
+  endDate: Time
+  parentId: Int
+  workspaceId: Int
+}
