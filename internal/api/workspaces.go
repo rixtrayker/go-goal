@@ -29,13 +29,13 @@ func (h *WorkspaceHandler) GetWorkspaces(w http.ResponseWriter, r *http.Request)
 
 	var workspaces []models.Workspace
 	for rows.Next() {
-		var w models.Workspace
-		err := rows.Scan(&w.ID, &w.Name, &w.Description, &w.CreatedAt)
+		var workspace models.Workspace
+		err := rows.Scan(&workspace.ID, &workspace.Name, &workspace.Description, &workspace.CreatedAt)
 		if err != nil {
 			http.Error(w, "Failed to scan workspace", http.StatusInternalServerError)
 			return
 		}
-		workspaces = append(workspaces, w)
+		workspaces = append(workspaces, workspace)
 	}
 
 	w.Header().Set("Content-Type", "application/json")

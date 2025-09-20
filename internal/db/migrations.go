@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
-	"path/filepath"
 )
 
 func RunMigrations(db *sql.DB) error {
