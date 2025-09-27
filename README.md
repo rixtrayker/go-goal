@@ -8,7 +8,7 @@ A flexible backlog and project management system built with Go and PostgreSQL, d
 - Projects with status tracking
 - Goals linked to projects with priorities and due dates
 - Tasks with flexible relationships to goals and projects
-- **Life Contexts** for thematic organization and color-coded visualization
+- **Life Flows** for thematic organization and color-coded visualization
 - Hierarchical tagging system
 - Notes that can be linked to any entity
 - Workspaces for organization
@@ -20,9 +20,9 @@ A flexible backlog and project management system built with Go and PostgreSQL, d
 
 ✅ **Web Interface**
 - Clean, minimal UI with responsive design
-- Dashboard with context status bar and color-coded visualization
-- List views for all entities with context indicators
-- Context management interface with timeline view
+- Dashboard with flow status bar and color-coded visualization
+- List views for all entities with flow indicators
+- Flow management interface with timeline view
 - Basic tagging system implementation
 
 ## 🚀 Quick Start
@@ -125,13 +125,13 @@ cd web && python3 -m http.server 3000
 - `PUT /api/v1/tasks/{id}` - Update task
 - `DELETE /api/v1/tasks/{id}` - Delete task
 
-### Contexts
-- `GET /api/v1/contexts` - List all contexts
-- `POST /api/v1/contexts` - Create context
-- `GET /api/v1/contexts/{id}` - Get context
-- `PUT /api/v1/contexts/{id}` - Update context
-- `DELETE /api/v1/contexts/{id}` - Delete context
-- `GET /api/v1/contexts/{id}/stats` - Get context statistics
+### Flows
+- `GET /api/v1/flows` - List all flows
+- `POST /api/v1/flows` - Create flow
+- `GET /api/v1/flows/{id}` - Get flow
+- `PUT /api/v1/flows/{id}` - Update flow
+- `DELETE /api/v1/flows/{id}` - Delete flow
+- `GET /api/v1/flows/{id}/stats` - Get flow statistics
 
 ### Tags
 - `GET /api/v1/tags` - List all tags
@@ -204,7 +204,7 @@ make info         # Show project information
 ### 🚧 In Development
 
 - Goals management
-- Context and tag management
+- Flow and tag management
 - Advanced sub-task hierarchies
 - Team collaboration features
 - File attachments
@@ -235,7 +235,7 @@ make info         # Show project information
 - **Phase 5**: 🎮 Gamification (quest system, achievements)
 - **Phase 6**: 🤖 AI & Intelligence (smart suggestions, scheduling)
 
-See `plan.md` for detailed feature specifications and `CONTEXTS.md` for comprehensive context feature documentation.
+See `plan.md` for detailed feature specifications and `FLOWS.md` for comprehensive flow feature documentation.
 
 ## Contributing
 
