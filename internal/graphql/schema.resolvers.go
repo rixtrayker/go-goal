@@ -6,7 +6,9 @@ package graphql
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"go-goal/internal/models"
 	"strconv"
 	"time"
 )
@@ -27,7 +29,15 @@ func (r *mutationResolver) CreateProject(ctx context.Context, input CreateProjec
 		return nil, fmt.Errorf("failed to create project: %w", err)
 	}
 
-	return &p, nil
+	return &Project{
+		ID:          strconv.Itoa(p.ID),
+		Title:       p.Title,
+		Description: &p.Description,
+		Status:      p.Status,
+		WorkspaceID: *p.WorkspaceID,
+		CreatedAt:   p.CreatedAt,
+		UpdatedAt:   p.UpdatedAt,
+	}, nil
 }
 
 // UpdateProject is the resolver for the updateProject field.
@@ -77,7 +87,15 @@ func (r *mutationResolver) UpdateProject(ctx context.Context, id string, input U
 		return nil, fmt.Errorf("failed to update project: %w", err)
 	}
 
-	return &p, nil
+	return &Project{
+		ID:          strconv.Itoa(p.ID),
+		Title:       p.Title,
+		Description: &p.Description,
+		Status:      p.Status,
+		WorkspaceID: *p.WorkspaceID,
+		CreatedAt:   p.CreatedAt,
+		UpdatedAt:   p.UpdatedAt,
+	}, nil
 }
 
 // DeleteProject is the resolver for the deleteProject field.
@@ -102,17 +120,121 @@ func (r *mutationResolver) DeleteProject(ctx context.Context, id string) (bool, 
 
 // CreateGoal is the resolver for the createGoal field.
 func (r *mutationResolver) CreateGoal(ctx context.Context, input CreateGoalInput) (*Goal, error) {
-	panic(fmt.Errorf("not implemented: CreateGoal - createGoal"))
+	var g models.Goal
+	now := time.Now()
+
+	err := r.DB.QueryRow(`
+		INSERT INTO goals (title, description, priority, due_date, status, project_id, flow_id, created_at, updated_at) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+		RETURNING id, title, description, priority, due_date, status, project_id, flow_id, created_at, updated_at
+	`, input.Title, input.Description, input.Priority, input.DueDate, input.Status, input.ProjectID, input.FlowID, now, now).Scan(
+		&g.ID, &g.Title, &g.Description, &g.Priority, &g.DueDate, &g.Status, &g.ProjectID, &g.FlowID, &g.CreatedAt, &g.UpdatedAt)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create goal: %w", err)
+	}
+
+	return &Goal{
+		ID:          strconv.Itoa(g.ID),
+		Title:       g.Title,
+		Description: &g.Description,
+		Priority:    fmt.Sprintf("%d", g.Priority),
+		DueDate:     g.DueDate,
+		Status:      g.Status,
+		ProjectID:   *g.ProjectID,
+		CreatedAt:   g.CreatedAt,
+		UpdatedAt:   g.UpdatedAt,
+	}, nil
 }
 
 // UpdateGoal is the resolver for the updateGoal field.
 func (r *mutationResolver) UpdateGoal(ctx context.Context, id string, input UpdateGoalInput) (*Goal, error) {
-	panic(fmt.Errorf("not implemented: UpdateGoal - updateGoal"))
+	goalID, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid goal ID: %w", err)
+	}
+
+	// Build dynamic update query
+	query := "UPDATE goals SET updated_at = $1"
+	args := []interface{}{time.Now()}
+	argIndex := 2
+
+	if input.Title != nil {
+		query += fmt.Sprintf(", title = $%d", argIndex)
+		args = append(args, *input.Title)
+		argIndex++
+	}
+	if input.Description != nil {
+		query += fmt.Sprintf(", description = $%d", argIndex)
+		args = append(args, *input.Description)
+		argIndex++
+	}
+	if input.Priority != nil {
+		query += fmt.Sprintf(", priority = $%d", argIndex)
+		args = append(args, *input.Priority)
+		argIndex++
+	}
+	if input.Status != nil {
+		query += fmt.Sprintf(", status = $%d", argIndex)
+		args = append(args, *input.Status)
+		argIndex++
+	}
+	if input.DueDate != nil {
+		query += fmt.Sprintf(", due_date = $%d", argIndex)
+		args = append(args, *input.DueDate)
+		argIndex++
+	}
+	if input.ProjectID != nil {
+		query += fmt.Sprintf(", project_id = $%d", argIndex)
+		args = append(args, *input.ProjectID)
+		argIndex++
+	}
+
+	query += fmt.Sprintf(" WHERE id = $%d RETURNING id, title, description, priority, due_date, status, project_id, context_id, created_at, updated_at", argIndex)
+	args = append(args, goalID)
+
+	var g models.Goal
+	err = r.DB.QueryRow(query, args...).Scan(
+		&g.ID, &g.Title, &g.Description, &g.Priority, &g.DueDate, &g.Status, &g.ProjectID, &g.FlowID, &g.CreatedAt, &g.UpdatedAt)
+
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("goal not found")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to update goal: %w", err)
+	}
+
+	return &Goal{
+		ID:          strconv.Itoa(g.ID),
+		Title:       g.Title,
+		Description: &g.Description,
+		Priority:    fmt.Sprintf("%d", g.Priority),
+		DueDate:     g.DueDate,
+		Status:      g.Status,
+		ProjectID:   *g.ProjectID,
+		CreatedAt:   g.CreatedAt,
+		UpdatedAt:   g.UpdatedAt,
+	}, nil
 }
 
 // DeleteGoal is the resolver for the deleteGoal field.
 func (r *mutationResolver) DeleteGoal(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteGoal - deleteGoal"))
+	goalID, err := strconv.Atoi(id)
+	if err != nil {
+		return false, fmt.Errorf("invalid goal ID: %w", err)
+	}
+
+	result, err := r.DB.Exec("DELETE FROM goals WHERE id = $1", goalID)
+	if err != nil {
+		return false, fmt.Errorf("failed to delete goal: %w", err)
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		return false, fmt.Errorf("goal not found")
+	}
+
+	return true, nil
 }
 
 // CreateTask is the resolver for the createTask field.
@@ -175,6 +297,21 @@ func (r *mutationResolver) DeleteWorkspace(ctx context.Context, id string) (bool
 	panic(fmt.Errorf("not implemented: DeleteWorkspace - deleteWorkspace"))
 }
 
+// CreateFlow is the resolver for the createFlow field.
+func (r *mutationResolver) CreateFlow(ctx context.Context, input CreateFlowInput) (*Flow, error) {
+	panic(fmt.Errorf("not implemented: CreateFlow - createFlow"))
+}
+
+// UpdateFlow is the resolver for the updateFlow field.
+func (r *mutationResolver) UpdateFlow(ctx context.Context, id string, input UpdateFlowInput) (*Flow, error) {
+	panic(fmt.Errorf("not implemented: UpdateFlow - updateFlow"))
+}
+
+// DeleteFlow is the resolver for the deleteFlow field.
+func (r *mutationResolver) DeleteFlow(ctx context.Context, id string) (bool, error) {
+	panic(fmt.Errorf("not implemented: DeleteFlow - deleteFlow"))
+}
+
 // AssignTag is the resolver for the assignTag field.
 func (r *mutationResolver) AssignTag(ctx context.Context, entityType string, entityID int, tagID int) (bool, error) {
 	panic(fmt.Errorf("not implemented: AssignTag - assignTag"))
@@ -205,14 +342,22 @@ func (r *queryResolver) Projects(ctx context.Context, workspaceID *int) ([]*Proj
 	}
 	defer rows.Close()
 
-	var projects []*models.Project
+	var projects []*Project
 	for rows.Next() {
 		var p models.Project
 		err := rows.Scan(&p.ID, &p.Title, &p.Description, &p.Status, &p.WorkspaceID, &p.CreatedAt, &p.UpdatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan project: %w", err)
 		}
-		projects = append(projects, &p)
+		projects = append(projects, &Project{
+			ID:          strconv.Itoa(p.ID),
+			Title:       p.Title,
+			Description: &p.Description,
+			Status:      p.Status,
+			WorkspaceID: *p.WorkspaceID,
+			CreatedAt:   p.CreatedAt,
+			UpdatedAt:   p.UpdatedAt,
+		})
 	}
 
 	return projects, nil
@@ -238,17 +383,113 @@ func (r *queryResolver) Project(ctx context.Context, id string) (*Project, error
 		return nil, fmt.Errorf("failed to fetch project: %w", err)
 	}
 
-	return &p, nil
+	return &Project{
+		ID:          strconv.Itoa(p.ID),
+		Title:       p.Title,
+		Description: &p.Description,
+		Status:      p.Status,
+		WorkspaceID: *p.WorkspaceID,
+		CreatedAt:   p.CreatedAt,
+		UpdatedAt:   p.UpdatedAt,
+	}, nil
 }
 
 // Goals is the resolver for the goals field.
 func (r *queryResolver) Goals(ctx context.Context, projectID *int) ([]*Goal, error) {
-	panic(fmt.Errorf("not implemented: Goals - goals"))
+	var goals []*Goal
+	var query string
+	var args []interface{}
+
+	if projectID != nil {
+		query = `SELECT id, title, description, priority, due_date, status, project_id, context_id, created_at, updated_at 
+				 FROM goals WHERE ($1 IS NULL OR project_id = $1) ORDER BY priority DESC, due_date ASC`
+		args = append(args, projectID)
+	} else {
+		query = `SELECT id, title, description, priority, due_date, status, project_id, context_id, created_at, updated_at 
+				 FROM goals ORDER BY priority DESC, due_date ASC`
+	}
+
+	rows, err := r.DB.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query goals: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var g models.Goal
+		err := rows.Scan(&g.ID, &g.Title, &g.Description, &g.Priority, &g.DueDate, &g.Status, &g.ProjectID, &g.FlowID, &g.CreatedAt, &g.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan goal: %w", err)
+		}
+
+		goal := &Goal{
+			ID:          strconv.Itoa(g.ID),
+			Title:       g.Title,
+			Description: &g.Description,
+			Priority:    fmt.Sprintf("%d", g.Priority),
+			DueDate:     g.DueDate,
+			Status:      g.Status,
+			CreatedAt:   g.CreatedAt,
+			UpdatedAt:   g.UpdatedAt,
+		}
+
+		if g.ProjectID != nil {
+			goal.ProjectID = *g.ProjectID
+		}
+		if g.FlowID != nil {
+			goal.FlowID = g.FlowID
+		}
+
+		goals = append(goals, goal)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to iterate goals: %w", err)
+	}
+
+	return goals, nil
 }
 
 // Goal is the resolver for the goal field.
 func (r *queryResolver) Goal(ctx context.Context, id string) (*Goal, error) {
-	panic(fmt.Errorf("not implemented: Goal - goal"))
+	goalID, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid goal ID: %w", err)
+	}
+
+	var g models.Goal
+	query := `SELECT id, title, description, priority, due_date, status, project_id, context_id, created_at, updated_at 
+			  FROM goals WHERE id = $1`
+
+	err = r.DB.QueryRow(query, goalID).Scan(
+		&g.ID, &g.Title, &g.Description, &g.Priority, &g.DueDate, &g.Status, &g.ProjectID, &g.FlowID, &g.CreatedAt, &g.UpdatedAt)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // GraphQL standard: return nil for not found
+		}
+		return nil, fmt.Errorf("failed to query goal: %w", err)
+	}
+
+	goal := &Goal{
+		ID:          strconv.Itoa(g.ID),
+		Title:       g.Title,
+		Description: &g.Description,
+		Priority:    fmt.Sprintf("%d", g.Priority),
+		DueDate:     g.DueDate,
+		Status:      g.Status,
+		CreatedAt:   g.CreatedAt,
+		UpdatedAt:   g.UpdatedAt,
+	}
+
+	if g.ProjectID != nil {
+		goal.ProjectID = *g.ProjectID
+	}
+	if g.FlowID != nil {
+		goal.FlowID = g.FlowID
+	}
+
+	return goal, nil
 }
 
 // Tasks is the resolver for the tasks field.
@@ -291,9 +532,111 @@ func (r *queryResolver) Workspace(ctx context.Context, id string) (*Workspace, e
 	panic(fmt.Errorf("not implemented: Workspace - workspace"))
 }
 
+// Flows is the resolver for the flows field.
+func (r *queryResolver) Flows(ctx context.Context, workspaceID *int) ([]*Flow, error) {
+	panic(fmt.Errorf("not implemented: Flows - flows"))
+}
+
+// Flow is the resolver for the flow field.
+func (r *queryResolver) Flow(ctx context.Context, id string) (*Flow, error) {
+	panic(fmt.Errorf("not implemented: Flow - flow"))
+}
+
 // Dashboard is the resolver for the dashboard field.
 func (r *queryResolver) Dashboard(ctx context.Context, workspaceID *int) (*Dashboard, error) {
-	panic(fmt.Errorf("not implemented: Dashboard - dashboard"))
+	// Get today's tasks
+	todayTasks := []*Task{}
+	tasksQuery := `SELECT id, title, description, status, priority, due_date, goal_id, project_id, context_id, created_at, updated_at 
+				  FROM tasks WHERE DATE(due_date) = CURRENT_DATE OR status = 'in_progress' ORDER BY priority DESC LIMIT 10`
+	tasksRows, err := r.DB.Query(tasksQuery)
+	if err == nil {
+		defer tasksRows.Close()
+		for tasksRows.Next() {
+			var t models.Task
+			tasksRows.Scan(&t.ID, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.GoalID, &t.ProjectID, &t.FlowID, &t.CreatedAt, &t.UpdatedAt)
+			todayTasks = append(todayTasks, &Task{
+				ID:          strconv.Itoa(t.ID),
+				Title:       t.Title,
+				Description: &t.Description,
+				Status:      t.Status,
+				Priority:    fmt.Sprintf("%d", t.Priority),
+				DueDate:     t.DueDate,
+				GoalID:      t.GoalID,
+				ProjectID:   *t.ProjectID,
+				CreatedAt:   t.CreatedAt,
+				UpdatedAt:   t.UpdatedAt,
+			})
+		}
+	}
+
+	// Get recent projects
+	recentProjects := []*Project{}
+	projectsQuery := `SELECT id, title, description, status, workspace_id, created_at, updated_at 
+					  FROM projects ORDER BY updated_at DESC LIMIT 5`
+	projectsRows, err := r.DB.Query(projectsQuery)
+	if err == nil {
+		defer projectsRows.Close()
+		for projectsRows.Next() {
+			var p models.Project
+			projectsRows.Scan(&p.ID, &p.Title, &p.Description, &p.Status, &p.WorkspaceID, &p.CreatedAt, &p.UpdatedAt)
+			recentProjects = append(recentProjects, &Project{
+				ID:          strconv.Itoa(p.ID),
+				Title:       p.Title,
+				Description: &p.Description,
+				Status:      p.Status,
+				WorkspaceID: *p.WorkspaceID,
+				CreatedAt:   p.CreatedAt,
+				UpdatedAt:   p.UpdatedAt,
+			})
+		}
+	}
+
+	// Get upcoming goals
+	upcomingGoals := []*Goal{}
+	goalsQuery := `SELECT id, title, description, priority, due_date, status, project_id, context_id, created_at, updated_at 
+				   FROM goals WHERE due_date > CURRENT_DATE ORDER BY due_date ASC LIMIT 5`
+	goalsRows, err := r.DB.Query(goalsQuery)
+	if err == nil {
+		defer goalsRows.Close()
+		for goalsRows.Next() {
+			var g models.Goal
+			goalsRows.Scan(&g.ID, &g.Title, &g.Description, &g.Priority, &g.DueDate, &g.Status, &g.ProjectID, &g.FlowID, &g.CreatedAt, &g.UpdatedAt)
+			upcomingGoals = append(upcomingGoals, &Goal{
+				ID:          strconv.Itoa(g.ID),
+				Title:       g.Title,
+				Description: &g.Description,
+				Priority:    fmt.Sprintf("%d", g.Priority),
+				DueDate:     g.DueDate,
+				Status:      g.Status,
+				ProjectID:   *g.ProjectID,
+				CreatedAt:   g.CreatedAt,
+				UpdatedAt:   g.UpdatedAt,
+			})
+		}
+	}
+
+	// Get workspace stats
+	var totalProjects, totalGoals, totalTasks, completedTasks, pendingTasks int
+	r.DB.QueryRow("SELECT COUNT(*) FROM projects").Scan(&totalProjects)
+	r.DB.QueryRow("SELECT COUNT(*) FROM goals").Scan(&totalGoals)
+	r.DB.QueryRow("SELECT COUNT(*) FROM tasks").Scan(&totalTasks)
+	r.DB.QueryRow("SELECT COUNT(*) FROM tasks WHERE status = 'completed'").Scan(&completedTasks)
+	r.DB.QueryRow("SELECT COUNT(*) FROM tasks WHERE status IN ('pending', 'in_progress')").Scan(&pendingTasks)
+
+	workspaceStats := &WorkspaceStats{
+		TotalProjects:  totalProjects,
+		TotalGoals:     totalGoals,
+		TotalTasks:     totalTasks,
+		CompletedTasks: completedTasks,
+		PendingTasks:   pendingTasks,
+	}
+
+	return &Dashboard{
+		TodayTasks:     todayTasks,
+		RecentProjects: recentProjects,
+		UpcomingGoals:  upcomingGoals,
+		WorkspaceStats: workspaceStats,
+	}, nil
 }
 
 // Mutation returns MutationResolver implementation.
@@ -302,5 +645,231 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+
+// Project field resolver for Goal
+func (r *goalResolver) Project(ctx context.Context, obj *Goal) (*Project, error) {
+	var p models.Project
+	err := r.DB.QueryRow(`
+		SELECT id, title, description, status, workspace_id, created_at, updated_at 
+		FROM projects WHERE id = $1
+	`, obj.ProjectID).Scan(&p.ID, &p.Title, &p.Description, &p.Status, &p.WorkspaceID, &p.CreatedAt, &p.UpdatedAt)
+
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("project with ID %d not found for goal %s", obj.ProjectID, obj.ID)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch project: %w", err)
+	}
+
+	return &Project{
+		ID:          strconv.Itoa(p.ID),
+		Title:       p.Title,
+		Description: &p.Description,
+		Status:      p.Status,
+		WorkspaceID: *p.WorkspaceID,
+		CreatedAt:   p.CreatedAt,
+		UpdatedAt:   p.UpdatedAt,
+	}, nil
+}
+
+// Flow field resolver for Goal
+func (r *goalResolver) Flow(ctx context.Context, obj *Goal) (*Flow, error) {
+	if obj.FlowID == nil {
+		return nil, nil
+	}
+
+	var f models.Flow
+	err := r.DB.QueryRow(`
+		SELECT id, title, description, color, status, start_date, end_date, parent_id, workspace_id, created_at, updated_at 
+		FROM flows WHERE id = $1
+	`, *obj.FlowID).Scan(&f.ID, &f.Title, &f.Description, &f.Color, &f.Status, &f.StartDate, &f.EndDate, &f.ParentID, &f.WorkspaceID, &f.CreatedAt, &f.UpdatedAt)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch flow: %w", err)
+	}
+
+	flow := &Flow{
+		ID:          strconv.Itoa(f.ID),
+		Title:       f.Title,
+		Description: &f.Description,
+		Color:       f.Color,
+		Status:      f.Status,
+		WorkspaceID: f.WorkspaceID,
+		CreatedAt:   f.CreatedAt,
+		UpdatedAt:   f.UpdatedAt,
+	}
+
+	if f.StartDate != nil {
+		flow.StartDate = f.StartDate
+	}
+	if f.EndDate != nil {
+		flow.EndDate = f.EndDate
+	}
+	if f.ParentID != nil {
+		flow.ParentID = f.ParentID
+	}
+
+	return flow, nil
+}
+
+// Tasks field resolver for Goal
+func (r *goalResolver) Tasks(ctx context.Context, obj *Goal) ([]*Task, error) {
+	goalID, err := strconv.Atoi(obj.ID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid goal ID: %w", err)
+	}
+
+	rows, err := r.DB.Query(`
+		SELECT id, title, description, status, priority, due_date, goal_id, project_id, context_id, created_at, updated_at 
+		FROM tasks WHERE goal_id = $1 ORDER BY priority DESC, due_date ASC
+	`, goalID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch tasks: %w", err)
+	}
+	defer rows.Close()
+
+	var tasks []*Task
+	for rows.Next() {
+		var t models.Task
+		err := rows.Scan(&t.ID, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.GoalID, &t.ProjectID, &t.FlowID, &t.CreatedAt, &t.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan task: %w", err)
+		}
+
+		task := &Task{
+			ID:          strconv.Itoa(t.ID),
+			Title:       t.Title,
+			Description: &t.Description,
+			Status:      t.Status,
+			Priority:    fmt.Sprintf("%d", t.Priority),
+			DueDate:     t.DueDate,
+			CreatedAt:   t.CreatedAt,
+			UpdatedAt:   t.UpdatedAt,
+		}
+
+		if t.GoalID != nil {
+			task.GoalID = t.GoalID
+		}
+		if t.ProjectID != nil {
+			task.ProjectID = *t.ProjectID
+		}
+		if t.FlowID != nil {
+			task.FlowID = t.FlowID
+		}
+
+		tasks = append(tasks, task)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to iterate tasks: %w", err)
+	}
+
+	return tasks, nil
+}
+
+// Tags field resolver for Goal
+func (r *goalResolver) Tags(ctx context.Context, obj *Goal) ([]*Tag, error) {
+	goalID, err := strconv.Atoi(obj.ID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid goal ID: %w", err)
+	}
+
+	rows, err := r.DB.Query(`
+		SELECT t.id, t.name, t.color, t.parent_id, t.created_at 
+		FROM tags t 
+		JOIN goal_tags gt ON t.id = gt.tag_id 
+		WHERE gt.goal_id = $1 ORDER BY t.name
+	`, goalID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch tags: %w", err)
+	}
+	defer rows.Close()
+
+	var tags []*Tag
+	for rows.Next() {
+		var t models.Tag
+		err := rows.Scan(&t.ID, &t.Name, &t.Color, &t.ParentID, &t.CreatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan tag: %w", err)
+		}
+
+		tag := &Tag{
+			ID:        strconv.Itoa(t.ID),
+			Name:      t.Name,
+			Color:     t.Color,
+			CreatedAt: t.CreatedAt,
+		}
+
+		if t.ParentID != nil {
+			tag.ParentID = t.ParentID
+		}
+
+		tags = append(tags, tag)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to iterate tags: %w", err)
+	}
+
+	return tags, nil
+}
+
+// Notes field resolver for Goal
+func (r *goalResolver) Notes(ctx context.Context, obj *Goal) ([]*Note, error) {
+	goalID, err := strconv.Atoi(obj.ID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid goal ID: %w", err)
+	}
+
+	rows, err := r.DB.Query(`
+		SELECT id, title, content, entity_type, entity_id, created_at, updated_at 
+		FROM notes WHERE entity_type = $1 AND entity_id = $2 ORDER BY created_at DESC
+	`, "goal", goalID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch notes: %w", err)
+	}
+	defer rows.Close()
+
+	var notes []*Note
+	for rows.Next() {
+		var n models.Note
+		err := rows.Scan(&n.ID, &n.Title, &n.Content, &n.EntityType, &n.EntityID, &n.CreatedAt, &n.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan note: %w", err)
+		}
+
+		notes = append(notes, &Note{
+			ID:         strconv.Itoa(n.ID),
+			Title:      n.Title,
+			Content:    n.Content,
+			EntityType: n.EntityType,
+			EntityID:   *n.EntityID,
+			CreatedAt:  n.CreatedAt,
+			UpdatedAt:  n.UpdatedAt,
+		})
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to iterate notes: %w", err)
+	}
+
+	return notes, nil
+}
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type projectResolver struct{ *Resolver }
+type goalResolver struct{ *Resolver }
+type taskResolver struct{ *Resolver }
+type noteResolver struct{ *Resolver }
+type tagResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.

@@ -1,0 +1,38 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="400" fill="#f9f9f9"/>
+
+  <!-- Bar Chart -->
+  <!-- Red bar -->
+  <rect x="100" y="270" width="30" height="60" rx="5" ry="5" fill="#e74c3c"/>
+  <!-- Orange bar -->
+  <rect x="160" y="210" width="30" height="120" rx="5" ry="5" fill="#f39c12"/>
+  <!-- Teal bar -->
+  <rect x="220" y="150" width="30" height="180" rx="5" ry="5" fill="#00bfa5"/>
+
+  <!-- Arabic Text "همة" -->
+  <text x="300" y="300" font-family="Arial, sans-serif" font-size="80" fill="#333" font-weight="bold" direction="rtl" text-anchor="middle">
+    همة
+  </text>
+
+  <!-- Arrow on top of the last letter -->
+  <path d="M790 470 
+           L810 450 
+           L830 470 
+           L830 490 
+           L790 490 
+           L790 470 
+           Z" 
+        fill="#333"/>
+  <path d="M810 450 
+           L810 490 
+           L790 490 
+           L790 470 
+           L810 450 
+           Z" 
+        fill="#333"/>
+
+  <!-- Two dots above the word -->
+  <circle cx="390" cy="440" r="10" fill="#333"/>
+  <circle cx="440" cy="440" r="10" fill="#333"/>
+</svg>

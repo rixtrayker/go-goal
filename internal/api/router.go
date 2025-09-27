@@ -4,11 +4,19 @@ import (
 	"database/sql"
 	"net/http"
 
+	"go-goal/internal/graphql"
+	"go-goal/pkg/config"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/mux"
 )
 
-func NewRouter(db *sql.DB) http.Handler {
+func NewRouter(db *sql.DB, cfg *config.Config) http.Handler {
 	r := mux.NewRouter()
+	
+	// Serve static files
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("web/static/"))))
 	
 	// Initialize handlers
 	projectHandler := &ProjectHandler{DB: db}
@@ -18,14 +26,20 @@ func NewRouter(db *sql.DB) http.Handler {
 	noteHandler := &NoteHandler{DB: db}
 	workspaceHandler := &WorkspaceHandler{DB: db}
 	taggingHandler := &TaggingHandler{DB: db}
-	contextHandler := &ContextHandler{DB: db}
-	webHandler := NewWebHandler()
+	flowHandler := &FlowHandler{DB: db}
+	webHandler := NewWebHandler(cfg)
 	
 	// Health check endpoint
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	}).Methods("GET")
+	
+	// GraphQL endpoint
+	resolver := &graphql.Resolver{DB: db}
+	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: resolver}))
+	r.Handle("/graphql", srv)
+	r.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
 	
 	// Web routes
 	r.HandleFunc("/", webHandler.Dashboard).Methods("GET")
@@ -36,7 +50,7 @@ func NewRouter(db *sql.DB) http.Handler {
 	r.HandleFunc("/tags", webHandler.Tags).Methods("GET")
 	r.HandleFunc("/notes", webHandler.Notes).Methods("GET")
 	r.HandleFunc("/workspaces", webHandler.Workspaces).Methods("GET")
-	r.HandleFunc("/contexts", webHandler.Contexts).Methods("GET")
+	r.HandleFunc("/flows", webHandler.Flows).Methods("GET")
 	
 	// API routes
 	api := r.PathPrefix("/api/v1").Subrouter()
@@ -88,13 +102,13 @@ func NewRouter(db *sql.DB) http.Handler {
 	api.HandleFunc("/tags/remove/{entity_type}/{entity_id:[0-9]+}/{tag_id:[0-9]+}", taggingHandler.RemoveTag).Methods("DELETE")
 	api.HandleFunc("/tags/{entity_type}/{entity_id:[0-9]+}", taggingHandler.GetEntityTags).Methods("GET")
 	
-	// Context routes
-	api.HandleFunc("/contexts", contextHandler.GetContexts).Methods("GET")
-	api.HandleFunc("/contexts", contextHandler.CreateContext).Methods("POST")
-	api.HandleFunc("/contexts/{id:[0-9]+}", contextHandler.GetContext).Methods("GET")
-	api.HandleFunc("/contexts/{id:[0-9]+}", contextHandler.UpdateContext).Methods("PUT")
-	api.HandleFunc("/contexts/{id:[0-9]+}", contextHandler.DeleteContext).Methods("DELETE")
-	api.HandleFunc("/contexts/{id:[0-9]+}/stats", contextHandler.GetContextStats).Methods("GET")
+	// Flow routes
+	api.HandleFunc("/flows", flowHandler.GetFlows).Methods("GET")
+	api.HandleFunc("/flows", flowHandler.CreateFlow).Methods("POST")
+	api.HandleFunc("/flows/{id:[0-9]+}", flowHandler.GetFlow).Methods("GET")
+	api.HandleFunc("/flows/{id:[0-9]+}", flowHandler.UpdateFlow).Methods("PUT")
+	api.HandleFunc("/flows/{id:[0-9]+}", flowHandler.DeleteFlow).Methods("DELETE")
+	api.HandleFunc("/flows/{id:[0-9]+}/stats", flowHandler.GetFlowStats).Methods("GET")
 	
 	return r
 }

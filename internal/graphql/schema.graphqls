@@ -6,14 +6,14 @@ type Project {
   description: String
   status: String!
   workspaceId: Int!
-  contextId: Int
+  flowId: Int
   createdAt: Time!
   updatedAt: Time!
   goals: [Goal!]
   tasks: [Task!]
   notes: [Note!]
   tags: [Tag!]
-  context: Context
+  flow: Flow
 }
 
 type Goal {
@@ -24,14 +24,14 @@ type Goal {
   dueDate: Time
   status: String!
   projectId: Int!
-  contextId: Int
+  flowId: Int
   createdAt: Time!
   updatedAt: Time!
   project: Project!
   tasks: [Task!]
   notes: [Note!]
   tags: [Tag!]
-  context: Context
+  flow: Flow
 }
 
 type Task {
@@ -43,14 +43,14 @@ type Task {
   dueDate: Time
   goalId: Int
   projectId: Int!
-  contextId: Int
+  flowId: Int
   createdAt: Time!
   updatedAt: Time!
   goal: Goal
   project: Project!
   notes: [Note!]
   tags: [Tag!]
-  context: Context
+  flow: Flow
 }
 
 type Tag {
@@ -86,10 +86,10 @@ type Workspace {
   createdAt: Time!
   updatedAt: Time!
   projects: [Project!]
-  contexts: [Context!]
+  flows: [Flow!]
 }
 
-type Context {
+type Flow {
   id: ID!
   title: String!
   description: String
@@ -101,8 +101,8 @@ type Context {
   workspaceId: Int!
   createdAt: Time!
   updatedAt: Time!
-  parent: Context
-  children: [Context!]
+  parent: Flow
+  children: [Flow!]
   projects: [Project!]
   goals: [Goal!]
   tasks: [Task!]
@@ -133,9 +133,9 @@ type Query {
   workspaces: [Workspace!]!
   workspace(id: ID!): Workspace
   
-  # Context queries
-  contexts(workspaceId: Int): [Context!]!
-  context(id: ID!): Context
+  # Flow queries
+  flows(workspaceId: Int): [Flow!]!
+  flow(id: ID!): Flow
   
   # Dashboard queries
   dashboard(workspaceId: Int): Dashboard!
@@ -187,10 +187,10 @@ type Mutation {
   updateWorkspace(id: ID!, input: UpdateWorkspaceInput!): Workspace!
   deleteWorkspace(id: ID!): Boolean!
   
-  # Context mutations
-  createContext(input: CreateContextInput!): Context!
-  updateContext(id: ID!, input: UpdateContextInput!): Context!
-  deleteContext(id: ID!): Boolean!
+  # Flow mutations
+  createFlow(input: CreateFlowInput!): Flow!
+  updateFlow(id: ID!, input: UpdateFlowInput!): Flow!
+  deleteFlow(id: ID!): Boolean!
   
   # Tagging mutations
   assignTag(entityType: String!, entityId: Int!, tagId: Int!): Boolean!
@@ -202,7 +202,7 @@ input CreateProjectInput {
   description: String
   status: String!
   workspaceId: Int!
-  contextId: Int
+  flowId: Int
 }
 
 input UpdateProjectInput {
@@ -210,7 +210,7 @@ input UpdateProjectInput {
   description: String
   status: String
   workspaceId: Int
-  contextId: Int
+  flowId: Int
 }
 
 input CreateGoalInput {
@@ -220,7 +220,7 @@ input CreateGoalInput {
   dueDate: Time
   status: String!
   projectId: Int!
-  contextId: Int
+  flowId: Int
 }
 
 input UpdateGoalInput {
@@ -230,7 +230,7 @@ input UpdateGoalInput {
   dueDate: Time
   status: String
   projectId: Int
-  contextId: Int
+  flowId: Int
 }
 
 input CreateTaskInput {
@@ -241,7 +241,7 @@ input CreateTaskInput {
   dueDate: Time
   goalId: Int
   projectId: Int!
-  contextId: Int
+  flowId: Int
 }
 
 input UpdateTaskInput {
@@ -252,7 +252,7 @@ input UpdateTaskInput {
   dueDate: Time
   goalId: Int
   projectId: Int
-  contextId: Int
+  flowId: Int
 }
 
 input CreateTagInput {
@@ -289,7 +289,7 @@ input UpdateWorkspaceInput {
   description: String
 }
 
-input CreateContextInput {
+input CreateFlowInput {
   title: String!
   description: String
   color: String!
@@ -300,7 +300,7 @@ input CreateContextInput {
   workspaceId: Int!
 }
 
-input UpdateContextInput {
+input UpdateFlowInput {
   title: String
   description: String
   color: String

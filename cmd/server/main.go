@@ -24,7 +24,7 @@ func main() {
 		log.Fatal("Failed to run migrations:", err)
 	}
 
-	router := api.NewRouter(database)
+	router := api.NewRouter(database, cfg)
 	
 	fmt.Printf("Server starting on port %s\n", cfg.Port)
 	log.Fatal(http.ListenAndServe(":"+cfg.Port, router))

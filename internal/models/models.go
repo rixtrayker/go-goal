@@ -10,7 +10,7 @@ type Project struct {
 	Description string    `json:"description" db:"description"`
 	Status      string    `json:"status" db:"status"`
 	WorkspaceID *int      `json:"workspace_id" db:"workspace_id"`
-	ContextID   *int      `json:"context_id" db:"context_id"`
+	FlowID      *int      `json:"flow_id" db:"flow_id"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
@@ -20,7 +20,7 @@ type Goal struct {
 	Title       string    `json:"title" db:"title"`
 	Description string    `json:"description" db:"description"`
 	ProjectID   *int      `json:"project_id" db:"project_id"`
-	ContextID   *int      `json:"context_id" db:"context_id"`
+	FlowID      *int      `json:"flow_id" db:"flow_id"`
 	Status      string    `json:"status" db:"status"`
 	Priority    int       `json:"priority" db:"priority"`
 	DueDate     *time.Time `json:"due_date" db:"due_date"`
@@ -34,7 +34,7 @@ type Task struct {
 	Description string    `json:"description" db:"description"`
 	GoalID      *int      `json:"goal_id" db:"goal_id"`
 	ProjectID   *int      `json:"project_id" db:"project_id"`
-	ContextID   *int      `json:"context_id" db:"context_id"`
+	FlowID      *int      `json:"flow_id" db:"flow_id"`
 	Status      string    `json:"status" db:"status"`
 	Priority    int       `json:"priority" db:"priority"`
 	DueDate     *time.Time `json:"due_date" db:"due_date"`
@@ -67,7 +67,7 @@ type Workspace struct {
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 }
 
-type Context struct {
+type Flow struct {
 	ID          int        `json:"id" db:"id"`
 	Title       string     `json:"title" db:"title"`
 	Description string     `json:"description" db:"description"`
