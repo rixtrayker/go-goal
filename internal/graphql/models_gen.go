@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type Context struct {
+type Flow struct {
 	ID          string     `json:"id"`
 	Title       string     `json:"title"`
 	Description *string    `json:"description,omitempty"`
@@ -18,14 +18,14 @@ type Context struct {
 	WorkspaceID int        `json:"workspaceId"`
 	CreatedAt   time.Time  `json:"createdAt"`
 	UpdatedAt   time.Time  `json:"updatedAt"`
-	Parent      *Context   `json:"parent,omitempty"`
-	Children    []*Context `json:"children,omitempty"`
+	Parent      *Flow      `json:"parent,omitempty"`
+	Children    []*Flow    `json:"children,omitempty"`
 	Projects    []*Project `json:"projects,omitempty"`
 	Goals       []*Goal    `json:"goals,omitempty"`
 	Tasks       []*Task    `json:"tasks,omitempty"`
 }
 
-type CreateContextInput struct {
+type CreateFlowInput struct {
 	Title       string     `json:"title"`
 	Description *string    `json:"description,omitempty"`
 	Color       string     `json:"color"`
@@ -43,7 +43,7 @@ type CreateGoalInput struct {
 	DueDate     *time.Time `json:"dueDate,omitempty"`
 	Status      string     `json:"status"`
 	ProjectID   int        `json:"projectId"`
-	ContextID   *int       `json:"contextId,omitempty"`
+	FlowID      *int       `json:"flowId,omitempty"`
 }
 
 type CreateNoteInput struct {
@@ -58,24 +58,24 @@ type CreateProjectInput struct {
 	Description *string `json:"description,omitempty"`
 	Status      string  `json:"status"`
 	WorkspaceID int     `json:"workspaceId"`
-	ContextID   *int    `json:"contextId,omitempty"`
+	FlowID      *int    `json:"flowId,omitempty"`
 }
 
 type CreateTagInput struct {
-	Name     string `json:"name"`
-	Color    string `json:"color"`
-	ParentID *int   `json:"parentId,omitempty"`
+	Name     string  `json:"name"`
+	Color    string  `json:"color"`
+	ParentID *int    `json:"parentId,omitempty"`
 }
 
 type CreateTaskInput struct {
-	Title       string     `json:"title"`
-	Description *string    `json:"description,omitempty"`
-	Status      string     `json:"status"`
-	Priority    string     `json:"priority"`
-	DueDate     *time.Time `json:"dueDate,omitempty"`
-	GoalID      *int       `json:"goalId,omitempty"`
-	ProjectID   int        `json:"projectId"`
-	ContextID   *int       `json:"contextId,omitempty"`
+	Title     string     `json:"title"`
+	Description *string  `json:"description,omitempty"`
+	Status    string     `json:"status"`
+	Priority  string     `json:"priority"`
+	DueDate   *time.Time `json:"dueDate,omitempty"`
+	GoalID    *int       `json:"goalId,omitempty"`
+	ProjectID int        `json:"projectId"`
+	FlowID    *int       `json:"flowId,omitempty"`
 }
 
 type CreateWorkspaceInput struct {
@@ -84,10 +84,10 @@ type CreateWorkspaceInput struct {
 }
 
 type Dashboard struct {
-	TodayTasks     []*Task         `json:"todayTasks"`
-	RecentProjects []*Project      `json:"recentProjects"`
-	UpcomingGoals  []*Goal         `json:"upcomingGoals"`
-	WorkspaceStats *WorkspaceStats `json:"workspaceStats"`
+	TodayTasks      []*Task          `json:"todayTasks"`
+	RecentProjects  []*Project       `json:"recentProjects"`
+	UpcomingGoals   []*Goal          `json:"upcomingGoals"`
+	WorkspaceStats  *WorkspaceStats  `json:"workspaceStats"`
 }
 
 type Goal struct {
@@ -98,62 +98,59 @@ type Goal struct {
 	DueDate     *time.Time `json:"dueDate,omitempty"`
 	Status      string     `json:"status"`
 	ProjectID   int        `json:"projectId"`
-	ContextID   *int       `json:"contextId,omitempty"`
+	FlowID      *int       `json:"flowId,omitempty"`
 	CreatedAt   time.Time  `json:"createdAt"`
 	UpdatedAt   time.Time  `json:"updatedAt"`
 	Project     *Project   `json:"project"`
 	Tasks       []*Task    `json:"tasks,omitempty"`
 	Notes       []*Note    `json:"notes,omitempty"`
 	Tags        []*Tag     `json:"tags,omitempty"`
-	Context     *Context   `json:"context,omitempty"`
-}
-
-type Mutation struct {
+	Flow        *Flow      `json:"flow,omitempty"`
 }
 
 type Note struct {
-	ID         string    `json:"id"`
-	Title      string    `json:"title"`
-	Content    string    `json:"content"`
-	EntityType string    `json:"entityType"`
-	EntityID   int       `json:"entityId"`
-	CreatedAt  time.Time `json:"createdAt"`
-	UpdatedAt  time.Time `json:"updatedAt"`
-	Tags       []*Tag    `json:"tags,omitempty"`
+	ID        string    `json:"id"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	EntityType string   `json:"entityType"`
+	EntityID  int       `json:"entityId"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	Tags      []*Tag    `json:"tags,omitempty"`
 }
 
 type Project struct {
-	ID          string    `json:"id"`
-	Title       string    `json:"title"`
-	Description *string   `json:"description,omitempty"`
-	Status      string    `json:"status"`
-	WorkspaceID int       `json:"workspaceId"`
-	ContextID   *int      `json:"contextId,omitempty"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	Goals       []*Goal   `json:"goals,omitempty"`
-	Tasks       []*Task   `json:"tasks,omitempty"`
-	Notes       []*Note   `json:"notes,omitempty"`
-	Tags        []*Tag    `json:"tags,omitempty"`
-	Context     *Context  `json:"context,omitempty"`
+	ID          string     `json:"id"`
+	Title       string     `json:"title"`
+	Description *string    `json:"description,omitempty"`
+	Status      string     `json:"status"`
+	WorkspaceID int        `json:"workspaceId"`
+	FlowID      *int       `json:"flowId,omitempty"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	UpdatedAt   time.Time  `json:"updatedAt"`
+	Goals       []*Goal    `json:"goals,omitempty"`
+	Tasks       []*Task    `json:"tasks,omitempty"`
+	Notes       []*Note    `json:"notes,omitempty"`
+	Tags        []*Tag     `json:"tags,omitempty"`
+	Flow        *Flow      `json:"flow,omitempty"`
 }
 
 type Query struct {
 }
 
 type Tag struct {
-	ID        string     `json:"id"`
-	Name      string     `json:"name"`
-	Color     string     `json:"color"`
-	ParentID  *int       `json:"parentId,omitempty"`
-	CreatedAt time.Time  `json:"createdAt"`
-	UpdatedAt time.Time  `json:"updatedAt"`
-	Parent    *Tag       `json:"parent,omitempty"`
-	Children  []*Tag     `json:"children,omitempty"`
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Color     string    `json:"color"`
+	ParentID  *int      `json:"parentId,omitempty"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	Parent    *Tag      `json:"parent,omitempty"`
+	Children  []*Tag    `json:"children,omitempty"`
 	Projects  []*Project `json:"projects,omitempty"`
-	Goals     []*Goal    `json:"goals,omitempty"`
-	Tasks     []*Task    `json:"tasks,omitempty"`
-	Notes     []*Note    `json:"notes,omitempty"`
+	Goals     []*Goal   `json:"goals,omitempty"`
+	Tasks     []*Task   `json:"tasks,omitempty"`
+	Notes     []*Note   `json:"notes,omitempty"`
 }
 
 type Task struct {
@@ -165,17 +162,17 @@ type Task struct {
 	DueDate     *time.Time `json:"dueDate,omitempty"`
 	GoalID      *int       `json:"goalId,omitempty"`
 	ProjectID   int        `json:"projectId"`
-	ContextID   *int       `json:"contextId,omitempty"`
+	FlowID      *int       `json:"flowId,omitempty"`
 	CreatedAt   time.Time  `json:"createdAt"`
 	UpdatedAt   time.Time  `json:"updatedAt"`
 	Goal        *Goal      `json:"goal,omitempty"`
 	Project     *Project   `json:"project"`
 	Notes       []*Note    `json:"notes,omitempty"`
 	Tags        []*Tag     `json:"tags,omitempty"`
-	Context     *Context   `json:"context,omitempty"`
+	Flow        *Flow      `json:"flow,omitempty"`
 }
 
-type UpdateContextInput struct {
+type UpdateFlowInput struct {
 	Title       *string    `json:"title,omitempty"`
 	Description *string    `json:"description,omitempty"`
 	Color       *string    `json:"color,omitempty"`
@@ -187,13 +184,13 @@ type UpdateContextInput struct {
 }
 
 type UpdateGoalInput struct {
-	Title       *string    `json:"title,omitempty"`
-	Description *string    `json:"description,omitempty"`
-	Priority    *string    `json:"priority,omitempty"`
-	DueDate     *time.Time `json:"dueDate,omitempty"`
-	Status      *string    `json:"status,omitempty"`
-	ProjectID   *int       `json:"projectId,omitempty"`
-	ContextID   *int       `json:"contextId,omitempty"`
+	Title     *string    `json:"title,omitempty"`
+	Description *string  `json:"description,omitempty"`
+	Priority  *string    `json:"priority,omitempty"`
+	DueDate   *time.Time `json:"dueDate,omitempty"`
+	Status    *string    `json:"status,omitempty"`
+	ProjectID *int       `json:"projectId,omitempty"`
+	FlowID    *int       `json:"flowId,omitempty"`
 }
 
 type UpdateNoteInput struct {
@@ -206,7 +203,7 @@ type UpdateProjectInput struct {
 	Description *string `json:"description,omitempty"`
 	Status      *string `json:"status,omitempty"`
 	WorkspaceID *int    `json:"workspaceId,omitempty"`
-	ContextID   *int    `json:"contextId,omitempty"`
+	FlowID      *int    `json:"flowId,omitempty"`
 }
 
 type UpdateTagInput struct {
@@ -216,14 +213,14 @@ type UpdateTagInput struct {
 }
 
 type UpdateTaskInput struct {
-	Title       *string    `json:"title,omitempty"`
-	Description *string    `json:"description,omitempty"`
-	Status      *string    `json:"status,omitempty"`
-	Priority    *string    `json:"priority,omitempty"`
-	DueDate     *time.Time `json:"dueDate,omitempty"`
-	GoalID      *int       `json:"goalId,omitempty"`
-	ProjectID   *int       `json:"projectId,omitempty"`
-	ContextID   *int       `json:"contextId,omitempty"`
+	Title     *string    `json:"title,omitempty"`
+	Description *string  `json:"description,omitempty"`
+	Status    *string    `json:"status,omitempty"`
+	Priority  *string    `json:"priority,omitempty"`
+	DueDate   *time.Time `json:"dueDate,omitempty"`
+	GoalID    *int       `json:"goalId,omitempty"`
+	ProjectID *int       `json:"projectId,omitempty"`
+	FlowID    *int       `json:"flowId,omitempty"`
 }
 
 type UpdateWorkspaceInput struct {
@@ -238,7 +235,7 @@ type Workspace struct {
 	CreatedAt   time.Time  `json:"createdAt"`
 	UpdatedAt   time.Time  `json:"updatedAt"`
 	Projects    []*Project `json:"projects,omitempty"`
-	Contexts    []*Context `json:"contexts,omitempty"`
+	Flows       []*Flow    `json:"flows,omitempty"`
 }
 
 type WorkspaceStats struct {
