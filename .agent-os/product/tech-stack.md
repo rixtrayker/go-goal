@@ -26,10 +26,12 @@
 
 ## Assets and Styling
 
-- **Fonts Provider:** System fonts (San Francisco, Segoe UI, Roboto)
+- **Fonts Provider:** Delius for English, IBM Plex Sans Arabic
 - **Icon Library:** Custom SVG icons
 - **CSS Architecture:** Component-based CSS with utility classes
 - **Responsive Design:** Mobile-first responsive grid system
+- **I18n:** We have both Arabic and English translations for frontend app, for backend errors, and notifications skip translation for this phase.
+
 
 ## Deployment and Infrastructure
 
@@ -48,6 +50,7 @@
 - **CI/CD Pipeline:** Ready for GitHub Actions setup
 - **Database Versioning:** Sequential numbered migrations
 - **Development Commands:** Comprehensive Makefile and dev scripts
+- Front
 
 ## Security and Data
 

@@ -6,11 +6,10 @@ Global tech stack defaults for Agent OS projects, overridable in project-specifi
 
 - App Framework: GraphQL 
 - Language: Golang 1.25+
-- Database: PostgreSQL 17+
+- Database: PostgreSQL 18+
 - ORM: pgx
 - JavaScript Framework: Svelte latest stable
-- Primary Database: PostgreSQL 17+
-- ORM: Active Record
+- Primary Database: PostgreSQL 18+
 - JavaScript Framework: Svelte latest stable
 - Build Tool: Vite
 - Import Strategy: Node.js modules
@@ -18,12 +17,10 @@ Global tech stack defaults for Agent OS projects, overridable in project-specifi
 - Node Version: 24.8
 - CSS Framework: TailwindCSS 4.1+
 - UI Components: Instrumental Components latest
-- UI Installation: Via development gems group
-- Font Provider: Google Fonts
-- Font Loading: Self-hosted for performance
+- Font Provider: Delius for English and IBM Plex Sans Arabic
 - Icons: Lucide Svelte latest components
 - CI/CD Platform: GitHub Actions
-- CI/CD Trigger: Push to main/staging branches
+- CI/CD Trigger: Push to main/dev branches
 - Tests: Run before deployment
 - Production Environment: main branch
 - Staging Environment: staging branch

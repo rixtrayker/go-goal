@@ -11,6 +11,7 @@ We always use the latest version of TailwindCSS for all CSS.
 - We implement one additional responsive breakpoint size called 'xs' which represents 400px.
 - If there are any custom CSS classes being used, those should be included at the start of the first line.
 
+- Support RTL and LTR  to support languages like 
 **Example of multi-line Tailwind CSS classes:**
 
 <div class="custom-cta bg-gray-50 dark:bg-gray-900 p-4 rounded cursor-pointer w-full
