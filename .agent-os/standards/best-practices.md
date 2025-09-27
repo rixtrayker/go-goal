@@ -33,6 +33,9 @@ ELSE:
 - focus on task scope, skip uncovered areas
 - mention recommended uncovered areas and suggest to add them to our mission plan
 
+## Database First
+- Delegate or transform heavy db queries into views, functions, stored procedures.
+
 ### File Structure
 - Keep files focused on a single responsibility
 - Group related functionality together

@@ -7,11 +7,11 @@
 
 ### Backend Features
 
-- [x] **Core Entity Models** - Projects, Goals, Tasks, Notes, Tags, Workspaces, Contexts `M`
+- [x] **Core Entity Models** - Projects, Goals, Tasks, Notes, Tags, Workspaces, Flows ( contexts fomerly) `M`
 - [x] **Database Schema** - Complete PostgreSQL schema with relationships and migrations `L`
 - [x] **REST API Endpoints** - Full CRUD operations for all entities with proper routing `L`
 - [x] **GraphQL Layer** - gqlgen integration with schema generation `M`
-- [x] **Life Contexts System** - Thematic organization with statistics endpoints `M`
+- [x] **Life Flows System** - Thematic organization with statistics endpoints `M`
 - [x] **Hierarchical Tagging** - Parent-child tag relationships with many-to-many linking `S`
 - [x] **Development Tooling** - Comprehensive Makefile, dev scripts, hot reload `S`
 
@@ -42,7 +42,7 @@
 ### Missing Implementation
 
 - [ ] **Goals Frontend Pages** - Complete Goals management UI (currently placeholder) `L`
-- [ ] **Contexts Frontend Pages** - Complete Contexts management UI (currently placeholder) `L`
+- [ ] **Flows Frontend Pages** - Complete Flows management UI (currently placeholder) `L`
 - [ ] **Notes Frontend Pages** - Complete Notes management UI (currently placeholder) `L`
 - [ ] **GraphQL Resolver Completion** - Finish all GraphQL resolvers for complex queries `M`
 - [ ] **API Integration Gaps** - Connect advanced frontend features to backend APIs `M`
@@ -101,7 +101,7 @@
 ### Features
 
 - [ ] **Smart Suggestions** - AI-powered task and goal suggestions based on patterns `L`
-- [ ] **Auto-categorization** - Automatic tagging and context assignment `M`
+- [ ] **Auto-categorization** - Automatic tagging and flow assignment `M`
 - [ ] **Analytics Dashboard** - Personal productivity insights and trends `L`
 - [ ] **Workflow Automation** - Simple automation rules for common actions `L`
 - [ ] **Natural Language Input** - Create tasks and notes from natural language `M`

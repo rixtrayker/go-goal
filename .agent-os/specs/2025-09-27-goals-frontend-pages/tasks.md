@@ -10,15 +10,15 @@
   - [x] 1.5 Test GraphQL playground queries to verify resolver functionality
   - [x] 1.6 Verify all resolver tests pass
 
-- [ ] 2. Implement Missing GraphQL Goal Relationship Resolvers  
-  - [ ] 2.1 Write tests for all Goal field resolvers (project, context, tasks, tags, notes)
-  - [ ] 2.2 Implement Goal.project resolver with foreign key lookup
-  - [ ] 2.3 Implement Goal.context resolver handling nullable context_id
-  - [ ] 2.4 Implement Goal.tasks resolver with proper ordering
-  - [ ] 2.5 Implement Goal.tags resolver with many-to-many join
-  - [ ] 2.6 Implement Goal.notes resolver filtering by entity_type and entity_id
-  - [ ] 2.7 Test relationship loading through GraphQL playground
-  - [ ] 2.8 Verify all relationship resolver tests pass
+- [x] 2. Implement Missing GraphQL Goal Relationship Resolvers  
+  - [x] 2.1 Write tests for all Goal field resolvers (project, context, tasks, tags, notes)
+  - [x] 2.2 Implement Goal.project resolver with foreign key lookup
+  - [x] 2.3 Implement Goal.context resolver handling nullable context_id
+  - [x] 2.4 Implement Goal.tasks resolver with proper ordering
+  - [x] 2.5 Implement Goal.tags resolver with many-to-many join
+  - [x] 2.6 Implement Goal.notes resolver filtering by entity_type and entity_id
+  - [x] 2.7 Test relationship loading through GraphQL playground
+  - [x] 2.8 Verify all relationship resolver tests pass
 
 - [ ] 3. Create Goals Page Component and Routing
   - [ ] 3.1 Write tests for GoalsPage component initialization and rendering

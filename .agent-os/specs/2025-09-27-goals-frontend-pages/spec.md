@@ -30,7 +30,7 @@ Goals display progress bars or completion percentages based on associated comple
 ## Spec Scope
 
 1. **Goals List View** - Complete list interface showing all goals with filtering, sorting, and search capabilities
-2. **Goal Creation Form** - Full form for creating new goals with project association, priority, due dates, and contexts
+2. **Goal Creation Form** - Full form for creating new goals with project association, priority, due dates, and flows
 3. **Goal Detail View** - Detailed goal view showing description, associated tasks, progress, and edit options
 4. **Goal Edit Interface** - In-place editing and full edit forms for updating goal properties
 5. **Goals-Tasks Integration** - Visual connections and navigation between goals and their associated tasks

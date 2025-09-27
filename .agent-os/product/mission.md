@@ -15,13 +15,13 @@ Go Goal is a personal productivity system that helps individuals organize their 
 
 **Sarah, the Freelance Developer** (28-35 years old)
 - **Role:** Full-stack Developer & Consultant
-- **Context:** Manages multiple client projects, personal learning goals, and side projects
+- **Flow:** Manages multiple client projects, personal learning goals, and side projects
 - **Pain Points:** Scattered tasks across different tools, difficulty tracking long-term goals, overwhelming project backlogs
 - **Goals:** Organize work efficiently, track skill development goals, maintain work-life balance
 
 **Mike, the Project Manager** (30-45 years old)
 - **Role:** Technical Project Manager
-- **Context:** Coordinates team projects while managing personal professional development
+- **Flow:** Coordinates team projects while managing personal professional development
 - **Pain Points:** Need for personal task organization separate from team tools, tracking personal career goals
 - **Goals:** Better personal organization, clear goal progression, structured note-taking
 
@@ -29,7 +29,7 @@ Go Goal is a personal productivity system that helps individuals organize their 
 
 ### Fragmented Personal Organization
 
-Most people use multiple disconnected tools for tasks, notes, and goal tracking, leading to context switching and lost information. Studies show knowledge workers spend 20% of their time searching for information across different platforms.
+Most people use multiple disconnected tools for tasks, notes, and goal tracking, leading to Flow switching and lost information. Studies show knowledge workers spend 20% of their time searching for information across different platforms.
 
 **Our Solution:** Unified system where projects, goals, tasks, and notes are interconnected with flexible relationships.
 
@@ -51,9 +51,9 @@ Existing productivity tools are either too simple (basic to-do lists) or overwhe
 
 Unlike rigid project management tools, Go Goal allows flexible connections between any entities (projects, goals, tasks, notes). Users can adapt the system to their unique workflow rather than forcing their work into predefined structures.
 
-### Context-Driven Organization
+### Flow-Driven Organization ( context-Driven)
 
-Go Goal introduces "Life Contexts" for thematic organization with color-coded visualization, helping users see their work across different life areas (career, health, learning, etc.) in one unified view.
+Go Goal introduces "Life Flows" for thematic organization with color-coded visualization, helping users see their work across different life areas (career, health, learning, etc.) in one unified view.
 
 ### Local-First with Web Interface
 
