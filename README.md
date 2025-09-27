@@ -25,38 +25,82 @@ A flexible backlog and project management system built with Go and PostgreSQL, d
 - Context management interface with timeline view
 - Basic tagging system implementation
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
-- Go 1.21+
-- PostgreSQL
+- **Go 1.23+** - [Install Go](https://golang.org/doc/install)
+- **PostgreSQL** - [Install PostgreSQL](https://www.postgresql.org/download/)
+- **Python 3** - For frontend development server (usually pre-installed on macOS/Linux)
 
-### Installation
+### 1. Clone and Setup
 
-1. Clone and setup:
 ```bash
-git clone <repo-url>
+git clone <your-repo-url>
 cd go-goal
-go mod tidy
 ```
 
-2. Set up PostgreSQL database:
+### 2. Database Setup
+
+Create a PostgreSQL database:
+
 ```bash
-createdb go_goal_dev
+# Connect to PostgreSQL as postgres user
+sudo -u postgres psql
+
+# Create database and user
+CREATE DATABASE go_goal;
+CREATE USER go_goal_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE go_goal TO go_goal_user;
+\q
 ```
 
-3. Configure environment (optional):
+Set your database URL:
+
 ```bash
-export DATABASE_URL="postgres://localhost/go_goal_dev?sslmode=disable"
-export PORT="8080"
+export DATABASE_URL='postgres://go_goal_user:your_password@localhost/go_goal?sslmode=disable'
 ```
 
-4. Run the application:
+### 3. Run Development Servers
+
+#### Option A: Using the dev script (Recommended)
+
 ```bash
+# Start both backend and frontend servers
+./dev.sh start
+
+# Or just start backend
+./dev.sh backend
+
+# Or just start frontend
+./dev.sh frontend
+```
+
+#### Option B: Using Makefile
+
+```bash
+# Start both servers concurrently
+make dev
+
+# Or start individually
+make backend    # Backend on http://localhost:8080
+make frontend   # Frontend on http://localhost:3000
+```
+
+#### Option C: Manual startup
+
+```bash
+# Terminal 1: Backend
 go run cmd/server/main.go
+
+# Terminal 2: Frontend
+cd web && python3 -m http.server 3000
 ```
 
-5. Visit `http://localhost:8080` to see the dashboard
+### 4. Access the Application
+
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080
+- **GraphQL Playground**: http://localhost:8080/graphql
 
 ## API Endpoints
 
@@ -103,6 +147,68 @@ go run cmd/server/main.go
 
 ### Notes & Workspaces
 Similar CRUD patterns for `/api/v1/notes` and `/api/v1/workspaces`
+
+## 🛠️ Development Commands
+
+### Using Makefile
+
+```bash
+# Development
+make dev          # Start both servers
+make backend      # Backend only
+make frontend     # Frontend only
+
+# Building
+make build        # Build Go binary
+make build-prod   # Production build
+
+# Maintenance
+make test         # Run tests
+make clean        # Clean build artifacts
+make deps         # Download dependencies
+
+# Database
+make db-setup     # Database setup instructions
+
+# Information
+make help         # Show all commands
+make info         # Show project information
+```
+
+### Using Development Script
+
+```bash
+./dev.sh start     # Start both servers (default)
+./dev.sh backend   # Backend only
+./dev.sh frontend  # Frontend only
+./dev.sh stop      # Stop all servers
+./dev.sh restart   # Restart all servers
+./dev.sh status    # Show server status
+./dev.sh help      # Show help
+```
+
+## 🎯 Features
+
+### ✅ Completed Features
+
+- **Dashboard**: Overview with statistics, recent activity, and mini calendar
+- **Projects**: Full CRUD operations with multiple view modes (List, Grid, Kanban)
+- **Tasks**: Complete task management with subtasks, due dates, and progress tracking
+- **Views**: Tree view, Kanban board, Calendar view for different data visualizations
+- **Search**: Global search with scopes and intelligent ranking
+- **UI/UX**: Modern glass morphism design with smooth animations
+- **Keyboard Shortcuts**: Power user features (⌘K for search, Alt+1-9 for navigation)
+- **Error Handling**: Comprehensive error logging and user feedback
+- **Real-time**: WebSocket support for live updates
+
+### 🚧 In Development
+
+- Goals management
+- Context and tag management
+- Advanced sub-task hierarchies
+- Team collaboration features
+- File attachments
+- Time tracking
 
 ## Project Structure
 

@@ -1,0 +1,3 @@
+# Spec Summary (Lite)
+
+Implement complete Goals management UI to replace current placeholder, providing full CRUD operations, multiple view modes, and seamless integration with existing project-task hierarchy. Users will be able to create, organize, and track progress on strategic objectives through a clean interface that maintains the system's hierarchical structure and connects goals to their associated tasks and projects.

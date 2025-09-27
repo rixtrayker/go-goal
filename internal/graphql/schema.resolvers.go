@@ -6,39 +6,53 @@ package graphql
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strconv"
 	"time"
+	"strings"
+
+	"go-goal/internal/models"
 )
 
-// CreateProject is the resolver for the createProject field.
-func (r *mutationResolver) CreateProject(ctx context.Context, input CreateProjectInput) (*Project, error) {
-	var p models.Project
+// CreateGoal is the resolver for the createGoal field.
+func (r *mutationResolver) CreateGoal(ctx context.Context, input CreateGoalInput) (*Goal, error) {
+	var g models.Goal
 	now := time.Now()
 
 	err := r.DB.QueryRow(`
-		INSERT INTO projects (title, description, status, workspace_id, created_at, updated_at) 
-		VALUES ($1, $2, $3, $4, $5, $6) 
-		RETURNING id, title, description, status, workspace_id, created_at, updated_at
-	`, input.Title, input.Description, input.Status, input.WorkspaceID, now, now).Scan(
-		&p.ID, &p.Title, &p.Description, &p.Status, &p.WorkspaceID, &p.CreatedAt, &p.UpdatedAt)
+		INSERT INTO goals (title, description, priority, due_date, status, project_id, context_id, created_at, updated_at) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+		RETURNING id, title, description, priority, due_date, status, project_id, context_id, created_at, updated_at
+	`, input.Title, input.Description, input.Priority, input.DueDate, input.Status, input.ProjectID, input.ContextID, now, now).Scan(
+		&g.ID, &g.Title, &g.Description, &g.Priority, &g.DueDate, &g.Status, &g.ProjectID, &g.ContextID, &g.CreatedAt, &g.UpdatedAt)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to create project: %w", err)
+		return nil, fmt.Errorf("failed to create goal: %w", err)
 	}
 
-	return &p, nil
+	return &Goal{
+		ID:          g.ID,
+		Title:       g.Title,
+		Description: &g.Description,
+		Priority:    fmt.Sprintf("%d", g.Priority),
+		DueDate:     g.DueDate,
+		Status:      g.Status,
+		ProjectID:   *g.ProjectID,
+		CreatedAt:   g.CreatedAt,
+		UpdatedAt:   g.UpdatedAt,
+	}, nil
 }
 
-// UpdateProject is the resolver for the updateProject field.
-func (r *mutationResolver) UpdateProject(ctx context.Context, id string, input UpdateProjectInput) (*Project, error) {
-	projectID, err := strconv.Atoi(id)
+// UpdateGoal is the resolver for the updateGoal field.
+func (r *mutationResolver) UpdateGoal(ctx context.Context, id string, input UpdateGoalInput) (*Goal, error) {
+	goalID, err := strconv.Atoi(id)
 	if err != nil {
-		return nil, fmt.Errorf("invalid project ID: %w", err)
+		return nil, fmt.Errorf("invalid goal ID: %w", err)
 	}
 
 	// Build dynamic update query
-	query := "UPDATE projects SET updated_at = $1"
+	query := "UPDATE goals SET updated_at = $1"
 	args := []interface{}{time.Now()}
 	argIndex := 2
 
@@ -52,248 +66,169 @@ func (r *mutationResolver) UpdateProject(ctx context.Context, id string, input U
 		args = append(args, *input.Description)
 		argIndex++
 	}
+	if input.Priority != nil {
+		query += fmt.Sprintf(", priority = $%d", argIndex)
+		args = append(args, *input.Priority)
+		argIndex++
+	}
 	if input.Status != nil {
 		query += fmt.Sprintf(", status = $%d", argIndex)
 		args = append(args, *input.Status)
 		argIndex++
 	}
-	if input.WorkspaceID != nil {
-		query += fmt.Sprintf(", workspace_id = $%d", argIndex)
-		args = append(args, *input.WorkspaceID)
+	if input.DueDate != nil {
+		query += fmt.Sprintf(", due_date = $%d", argIndex)
+		args = append(args, *input.DueDate)
+		argIndex++
+	}
+	if input.ProjectID != nil {
+		query += fmt.Sprintf(", project_id = $%d", argIndex)
+		args = append(args, *input.ProjectID)
 		argIndex++
 	}
 
-	query += fmt.Sprintf(" WHERE id = $%d RETURNING id, title, description, status, workspace_id, created_at, updated_at", argIndex)
-	args = append(args, projectID)
+	query += fmt.Sprintf(" WHERE id = $%d RETURNING id, title, description, priority, due_date, status, project_id, context_id, created_at, updated_at", argIndex)
+	args = append(args, goalID)
 
-	var p models.Project
+	var g models.Goal
 	err = r.DB.QueryRow(query, args...).Scan(
-		&p.ID, &p.Title, &p.Description, &p.Status, &p.WorkspaceID, &p.CreatedAt, &p.UpdatedAt)
+		&g.ID, &g.Title, &g.Description, &g.Priority, &g.DueDate, &g.Status, &g.ProjectID, &g.ContextID, &g.CreatedAt, &g.UpdatedAt)
 
 	if err == sql.ErrNoRows {
-		return nil, fmt.Errorf("project not found")
+		return nil, fmt.Errorf("goal not found")
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to update project: %w", err)
+		return nil, fmt.Errorf("failed to update goal: %w", err)
 	}
 
-	return &p, nil
+	return &Goal{
+		ID:          g.ID,
+		Title:       g.Title,
+		Description: &g.Description,
+		Priority:    fmt.Sprintf("%d", g.Priority),
+		DueDate:     g.DueDate,
+		Status:      g.Status,
+		ProjectID:   *g.ProjectID,
+		CreatedAt:   g.CreatedAt,
+		UpdatedAt:   g.UpdatedAt,
+	}, nil
 }
 
-// DeleteProject is the resolver for the deleteProject field.
-func (r *mutationResolver) DeleteProject(ctx context.Context, id string) (bool, error) {
-	projectID, err := strconv.Atoi(id)
+// DeleteGoal is the resolver for the deleteGoal field.
+func (r *mutationResolver) DeleteGoal(ctx context.Context, id string) (bool, error) {
+	goalID, err := strconv.Atoi(id)
 	if err != nil {
-		return false, fmt.Errorf("invalid project ID: %w", err)
+		return false, fmt.Errorf("invalid goal ID: %w", err)
 	}
 
-	result, err := r.DB.Exec("DELETE FROM projects WHERE id = $1", projectID)
+	result, err := r.DB.Exec("DELETE FROM goals WHERE id = $1", goalID)
 	if err != nil {
-		return false, fmt.Errorf("failed to delete project: %w", err)
+		return false, fmt.Errorf("failed to delete goal: %w", err)
 	}
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return false, fmt.Errorf("project not found")
+		return false, fmt.Errorf("goal not found")
 	}
 
 	return true, nil
 }
 
-// CreateGoal is the resolver for the createGoal field.
-func (r *mutationResolver) CreateGoal(ctx context.Context, input CreateGoalInput) (*Goal, error) {
-	panic(fmt.Errorf("not implemented: CreateGoal - createGoal"))
-}
-
-// UpdateGoal is the resolver for the updateGoal field.
-func (r *mutationResolver) UpdateGoal(ctx context.Context, id string, input UpdateGoalInput) (*Goal, error) {
-	panic(fmt.Errorf("not implemented: UpdateGoal - updateGoal"))
-}
-
-// DeleteGoal is the resolver for the deleteGoal field.
-func (r *mutationResolver) DeleteGoal(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteGoal - deleteGoal"))
-}
-
-// CreateTask is the resolver for the createTask field.
-func (r *mutationResolver) CreateTask(ctx context.Context, input CreateTaskInput) (*Task, error) {
-	panic(fmt.Errorf("not implemented: CreateTask - createTask"))
-}
-
-// UpdateTask is the resolver for the updateTask field.
-func (r *mutationResolver) UpdateTask(ctx context.Context, id string, input UpdateTaskInput) (*Task, error) {
-	panic(fmt.Errorf("not implemented: UpdateTask - updateTask"))
-}
-
-// DeleteTask is the resolver for the deleteTask field.
-func (r *mutationResolver) DeleteTask(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteTask - deleteTask"))
-}
-
-// CreateTag is the resolver for the createTag field.
-func (r *mutationResolver) CreateTag(ctx context.Context, input CreateTagInput) (*Tag, error) {
-	panic(fmt.Errorf("not implemented: CreateTag - createTag"))
-}
-
-// UpdateTag is the resolver for the updateTag field.
-func (r *mutationResolver) UpdateTag(ctx context.Context, id string, input UpdateTagInput) (*Tag, error) {
-	panic(fmt.Errorf("not implemented: UpdateTag - updateTag"))
-}
-
-// DeleteTag is the resolver for the deleteTag field.
-func (r *mutationResolver) DeleteTag(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteTag - deleteTag"))
-}
-
-// CreateNote is the resolver for the createNote field.
-func (r *mutationResolver) CreateNote(ctx context.Context, input CreateNoteInput) (*Note, error) {
-	panic(fmt.Errorf("not implemented: CreateNote - createNote"))
-}
-
-// UpdateNote is the resolver for the updateNote field.
-func (r *mutationResolver) UpdateNote(ctx context.Context, id string, input UpdateNoteInput) (*Note, error) {
-	panic(fmt.Errorf("not implemented: UpdateNote - updateNote"))
-}
-
-// DeleteNote is the resolver for the deleteNote field.
-func (r *mutationResolver) DeleteNote(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteNote - deleteNote"))
-}
-
-// CreateWorkspace is the resolver for the createWorkspace field.
-func (r *mutationResolver) CreateWorkspace(ctx context.Context, input CreateWorkspaceInput) (*Workspace, error) {
-	panic(fmt.Errorf("not implemented: CreateWorkspace - createWorkspace"))
-}
-
-// UpdateWorkspace is the resolver for the updateWorkspace field.
-func (r *mutationResolver) UpdateWorkspace(ctx context.Context, id string, input UpdateWorkspaceInput) (*Workspace, error) {
-	panic(fmt.Errorf("not implemented: UpdateWorkspace - updateWorkspace"))
-}
-
-// DeleteWorkspace is the resolver for the deleteWorkspace field.
-func (r *mutationResolver) DeleteWorkspace(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteWorkspace - deleteWorkspace"))
-}
-
-// AssignTag is the resolver for the assignTag field.
-func (r *mutationResolver) AssignTag(ctx context.Context, entityType string, entityID int, tagID int) (bool, error) {
-	panic(fmt.Errorf("not implemented: AssignTag - assignTag"))
-}
-
-// RemoveTag is the resolver for the removeTag field.
-func (r *mutationResolver) RemoveTag(ctx context.Context, entityType string, entityID int, tagID int) (bool, error) {
-	panic(fmt.Errorf("not implemented: RemoveTag - removeTag"))
-}
-
-// Projects is the resolver for the projects field.
-func (r *queryResolver) Projects(ctx context.Context, workspaceID *int) ([]*Project, error) {
-	var query string
-	var args []interface{}
-
-	if workspaceID != nil {
-		query = `SELECT id, title, description, status, workspace_id, created_at, updated_at 
-				 FROM projects WHERE workspace_id = $1 ORDER BY created_at DESC`
-		args = append(args, *workspaceID)
-	} else {
-		query = `SELECT id, title, description, status, workspace_id, created_at, updated_at 
-				 FROM projects ORDER BY created_at DESC`
-	}
-
-	rows, err := r.DB.Query(query, args...)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch projects: %w", err)
-	}
-	defer rows.Close()
-
-	var projects []*models.Project
-	for rows.Next() {
-		var p models.Project
-		err := rows.Scan(&p.ID, &p.Title, &p.Description, &p.Status, &p.WorkspaceID, &p.CreatedAt, &p.UpdatedAt)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan project: %w", err)
-		}
-		projects = append(projects, &p)
-	}
-
-	return projects, nil
-}
-
-// Project is the resolver for the project field.
-func (r *queryResolver) Project(ctx context.Context, id string) (*Project, error) {
-	projectID, err := strconv.Atoi(id)
-	if err != nil {
-		return nil, fmt.Errorf("invalid project ID: %w", err)
-	}
-
-	var p models.Project
-	err = r.DB.QueryRow(`
-		SELECT id, title, description, status, workspace_id, created_at, updated_at 
-		FROM projects WHERE id = $1
-	`, projectID).Scan(&p.ID, &p.Title, &p.Description, &p.Status, &p.WorkspaceID, &p.CreatedAt, &p.UpdatedAt)
-
-	if err == sql.ErrNoRows {
-		return nil, fmt.Errorf("project not found")
-	}
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch project: %w", err)
-	}
-
-	return &p, nil
-}
-
-// Goals is the resolver for the goals field.
-func (r *queryResolver) Goals(ctx context.Context, projectID *int) ([]*Goal, error) {
-	panic(fmt.Errorf("not implemented: Goals - goals"))
-}
-
-// Goal is the resolver for the goal field.
-func (r *queryResolver) Goal(ctx context.Context, id string) (*Goal, error) {
-	panic(fmt.Errorf("not implemented: Goal - goal"))
-}
-
-// Tasks is the resolver for the tasks field.
-func (r *queryResolver) Tasks(ctx context.Context, projectID *int, goalID *int, status *string) ([]*Task, error) {
-	panic(fmt.Errorf("not implemented: Tasks - tasks"))
-}
-
-// Task is the resolver for the task field.
-func (r *queryResolver) Task(ctx context.Context, id string) (*Task, error) {
-	panic(fmt.Errorf("not implemented: Task - task"))
-}
-
-// Tags is the resolver for the tags field.
-func (r *queryResolver) Tags(ctx context.Context, parentID *int) ([]*Tag, error) {
-	panic(fmt.Errorf("not implemented: Tags - tags"))
-}
-
-// Tag is the resolver for the tag field.
-func (r *queryResolver) Tag(ctx context.Context, id string) (*Tag, error) {
-	panic(fmt.Errorf("not implemented: Tag - tag"))
-}
-
-// Notes is the resolver for the notes field.
-func (r *queryResolver) Notes(ctx context.Context, entityType *string, entityID *int) ([]*Note, error) {
-	panic(fmt.Errorf("not implemented: Notes - notes"))
-}
-
-// Note is the resolver for the note field.
-func (r *queryResolver) Note(ctx context.Context, id string) (*Note, error) {
-	panic(fmt.Errorf("not implemented: Note - note"))
-}
-
-// Workspaces is the resolver for the workspaces field.
-func (r *queryResolver) Workspaces(ctx context.Context) ([]*Workspace, error) {
-	panic(fmt.Errorf("not implemented: Workspaces - workspaces"))
-}
-
-// Workspace is the resolver for the workspace field.
-func (r *queryResolver) Workspace(ctx context.Context, id string) (*Workspace, error) {
-	panic(fmt.Errorf("not implemented: Workspace - workspace"))
-}
-
 // Dashboard is the resolver for the dashboard field.
 func (r *queryResolver) Dashboard(ctx context.Context, workspaceID *int) (*Dashboard, error) {
-	panic(fmt.Errorf("not implemented: Dashboard - dashboard"))
+	// Get today's tasks
+	todayTasks := []*Task{}
+	tasksQuery := `SELECT id, title, description, status, priority, due_date, goal_id, project_id, context_id, created_at, updated_at 
+				  FROM tasks WHERE DATE(due_date) = CURRENT_DATE OR status = 'in_progress' ORDER BY priority DESC LIMIT 10`
+	tasksRows, err := r.DB.Query(tasksQuery)
+	if err == nil {
+		defer tasksRows.Close()
+		for tasksRows.Next() {
+			var t models.Task
+			tasksRows.Scan(&t.ID, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.GoalID, &t.ProjectID, &t.ContextID, &t.CreatedAt, &t.UpdatedAt)
+			todayTasks = append(todayTasks, &Task{
+				ID:          t.ID,
+				Title:       t.Title,
+				Description: &t.Description,
+				Status:      t.Status,
+				Priority:    fmt.Sprintf("%d", t.Priority),
+				DueDate:     t.DueDate,
+				GoalID:      t.GoalID,
+				ProjectID:   *t.ProjectID,
+				CreatedAt:   t.CreatedAt,
+				UpdatedAt:   t.UpdatedAt,
+			})
+		}
+	}
+
+	// Get recent projects
+	recentProjects := []*Project{}
+	projectsQuery := `SELECT id, title, description, status, workspace_id, created_at, updated_at 
+					  FROM projects ORDER BY updated_at DESC LIMIT 5`
+	projectsRows, err := r.DB.Query(projectsQuery)
+	if err == nil {
+		defer projectsRows.Close()
+		for projectsRows.Next() {
+			var p models.Project
+			projectsRows.Scan(&p.ID, &p.Title, &p.Description, &p.Status, &p.WorkspaceID, &p.CreatedAt, &p.UpdatedAt)
+			recentProjects = append(recentProjects, &Project{
+				ID:          p.ID,
+				Title:       p.Title,
+				Description: &p.Description,
+				Status:      p.Status,
+				WorkspaceID: *p.WorkspaceID,
+				CreatedAt:   p.CreatedAt,
+				UpdatedAt:   p.UpdatedAt,
+			})
+		}
+	}
+
+	// Get upcoming goals
+	upcomingGoals := []*Goal{}
+	goalsQuery := `SELECT id, title, description, priority, due_date, status, project_id, context_id, created_at, updated_at 
+				   FROM goals WHERE due_date > CURRENT_DATE ORDER BY due_date ASC LIMIT 5`
+	goalsRows, err := r.DB.Query(goalsQuery)
+	if err == nil {
+		defer goalsRows.Close()
+		for goalsRows.Next() {
+			var g models.Goal
+			goalsRows.Scan(&g.ID, &g.Title, &g.Description, &g.Priority, &g.DueDate, &g.Status, &g.ProjectID, &g.ContextID, &g.CreatedAt, &g.UpdatedAt)
+			upcomingGoals = append(upcomingGoals, &Goal{
+				ID:          g.ID,
+				Title:       g.Title,
+				Description: &g.Description,
+				Priority:    fmt.Sprintf("%d", g.Priority),
+				DueDate:     g.DueDate,
+				Status:      g.Status,
+				ProjectID:   *g.ProjectID,
+				CreatedAt:   g.CreatedAt,
+				UpdatedAt:   g.UpdatedAt,
+			})
+		}
+	}
+
+	// Get workspace stats
+	var totalProjects, totalGoals, totalTasks, completedTasks, pendingTasks int
+	r.DB.QueryRow("SELECT COUNT(*) FROM projects").Scan(&totalProjects)
+	r.DB.QueryRow("SELECT COUNT(*) FROM goals").Scan(&totalGoals)
+	r.DB.QueryRow("SELECT COUNT(*) FROM tasks").Scan(&totalTasks)
+	r.DB.QueryRow("SELECT COUNT(*) FROM tasks WHERE status = 'completed'").Scan(&completedTasks)
+	r.DB.QueryRow("SELECT COUNT(*) FROM tasks WHERE status IN ('pending', 'in_progress')").Scan(&pendingTasks)
+
+	workspaceStats := &WorkspaceStats{
+		TotalProjects:  totalProjects,
+		TotalGoals:     totalGoals,
+		TotalTasks:     totalTasks,
+		CompletedTasks: completedTasks,
+		PendingTasks:   pendingTasks,
+	}
+
+	return &Dashboard{
+		TodayTasks:     todayTasks,
+		RecentProjects: recentProjects,
+		UpcomingGoals:  upcomingGoals,
+		WorkspaceStats: workspaceStats,
+	}, nil
 }
 
 // Mutation returns MutationResolver implementation.
@@ -302,5 +237,25 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// Project returns ProjectResolver implementation.
+func (r *Resolver) Project() ProjectResolver { return &projectResolver{r} }
+
+// Goal returns GoalResolver implementation.
+func (r *Resolver) Goal() GoalResolver { return &goalResolver{r} }
+
+// Task returns TaskResolver implementation.
+func (r *Resolver) Task() TaskResolver { return &taskResolver{r} }
+
+// Note returns NoteResolver implementation.
+func (r *Resolver) Note() NoteResolver { return &noteResolver{r} }
+
+// Tag returns TagResolver implementation.
+func (r *Resolver) Tag() TagResolver { return &tagResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type projectResolver struct{ *Resolver }
+type goalResolver struct{ *Resolver }
+type taskResolver struct{ *Resolver }
+type noteResolver struct{ *Resolver }
+type tagResolver struct{ *Resolver }

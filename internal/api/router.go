@@ -4,11 +4,19 @@ import (
 	"database/sql"
 	"net/http"
 
+	"go-goal/pkg/config"
+	"go-goal/internal/graphql"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/mux"
 )
 
-func NewRouter(db *sql.DB) http.Handler {
+func NewRouter(db *sql.DB, cfg *config.Config) http.Handler {
 	r := mux.NewRouter()
+	
+	// Serve static files
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("web/static/"))))
 	
 	// Initialize handlers
 	projectHandler := &ProjectHandler{DB: db}
@@ -19,13 +27,19 @@ func NewRouter(db *sql.DB) http.Handler {
 	workspaceHandler := &WorkspaceHandler{DB: db}
 	taggingHandler := &TaggingHandler{DB: db}
 	contextHandler := &ContextHandler{DB: db}
-	webHandler := NewWebHandler()
+	webHandler := NewWebHandler(cfg)
 	
 	// Health check endpoint
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	}).Methods("GET")
+	
+	// GraphQL endpoint
+	resolver := &graphql.Resolver{DB: db}
+	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: resolver}))
+	r.Handle("/graphql", srv)
+	r.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
 	
 	// Web routes
 	r.HandleFunc("/", webHandler.Dashboard).Methods("GET")
