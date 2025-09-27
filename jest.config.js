@@ -1,6 +1,6 @@
 module.exports = {
   testEnvironment: 'jsdom',
-  roots: ['<rootDir>/web/static/js'],
+  roots: ['<rootDir>/web/static/js', '<rootDir>/tests'],
   testMatch: ['**/*.test.js'],
   transform: {
     '^.+\\.js$': 'babel-jest',
@@ -10,5 +10,6 @@ module.exports = {
     'web/static/js/**/*.js',
     '!web/static/js/tests/**',
     '!**/node_modules/**',
+    '!tests/**',
   ],
 };
