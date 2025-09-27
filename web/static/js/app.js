@@ -223,19 +223,41 @@ class App {
       { title: "Edit Task - همة" }
     );
 
-    // Goals routes (placeholder for future implementation)
+    // Goals routes
     window.router.addRoute(
       "/goals",
       async () => {
-        this.mainContainer.innerHTML = `
-        <div class="page-placeholder">
-          <h1>Goals</h1>
-          <p>Goals management coming soon!</p>
-          <button class="btn btn-primary" onclick="router.navigate('/')">Back to Dashboard</button>
-        </div>
-      `;
+        const goalsPage = new GoalsPage(this.mainContainer);
+        await goalsPage.render();
       },
       { title: "Goals - همة" }
+    );
+
+    window.router.addRoute(
+      "/goals/new",
+      async () => {
+        const goalsPage = new GoalsPage(this.mainContainer);
+        await goalsPage.render({ action: "new" });
+      },
+      { title: "New Goal - همة" }
+    );
+
+    window.router.addRoute(
+      "/goals/:id",
+      async (params) => {
+        const goalsPage = new GoalsPage(this.mainContainer);
+        await goalsPage.render({ id: params.id });
+      },
+      { title: "Goal Details - همة" }
+    );
+
+    window.router.addRoute(
+      "/goals/:id/edit",
+      async (params) => {
+        const goalsPage = new GoalsPage(this.mainContainer);
+        await goalsPage.render({ id: params.id, action: "edit" });
+      },
+      { title: "Edit Goal - همة" }
     );
 
     // Flows routes (placeholder for future implementation)

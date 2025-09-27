@@ -185,7 +185,7 @@ func TestGoalConversion(t *testing.T) {
 			DueDate:     &dueDate,
 			Status:      "in_progress",
 			ProjectID:   &[]int{2}[0],
-			ContextID:   &contextId,
+			FlowID:      &contextId,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		}
@@ -198,7 +198,7 @@ func TestGoalConversion(t *testing.T) {
 			DueDate:     modelGoal.DueDate,
 			Status:      modelGoal.Status,
 			ProjectID:   *modelGoal.ProjectID,
-			ContextID:   modelGoal.ContextID,
+			FlowID:      modelGoal.FlowID,
 			CreatedAt:   modelGoal.CreatedAt,
 			UpdatedAt:   modelGoal.UpdatedAt,
 		}
@@ -210,7 +210,7 @@ func TestGoalConversion(t *testing.T) {
 		assert.Equal(t, modelGoal.DueDate, gqlGoal.DueDate)
 		assert.Equal(t, modelGoal.Status, gqlGoal.Status)
 		assert.Equal(t, *modelGoal.ProjectID, gqlGoal.ProjectID)
-		assert.Equal(t, modelGoal.ContextID, gqlGoal.ContextID)
+		assert.Equal(t, modelGoal.FlowID, gqlGoal.FlowID)
 		assert.Equal(t, modelGoal.CreatedAt, gqlGoal.CreatedAt)
 		assert.Equal(t, modelGoal.UpdatedAt, gqlGoal.UpdatedAt)
 	})
@@ -226,7 +226,7 @@ func TestGoalConversion(t *testing.T) {
 			DueDate:     nil,
 			Status:      "active",
 			ProjectID:   &[]int{2}[0],
-			ContextID:   nil,
+			FlowID:      nil,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		}
@@ -239,13 +239,13 @@ func TestGoalConversion(t *testing.T) {
 			DueDate:     modelGoal.DueDate,
 			Status:      modelGoal.Status,
 			ProjectID:   *modelGoal.ProjectID,
-			ContextID:   modelGoal.ContextID,
+			FlowID:      modelGoal.FlowID,
 			CreatedAt:   modelGoal.CreatedAt,
 			UpdatedAt:   modelGoal.UpdatedAt,
 		}
 
 		assert.Equal(t, "", *gqlGoal.Description)
 		assert.Nil(t, gqlGoal.DueDate)
-		assert.Nil(t, gqlGoal.ContextID)
+		assert.Nil(t, gqlGoal.FlowID)
 	})
 }

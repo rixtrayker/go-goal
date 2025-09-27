@@ -45,7 +45,7 @@ func TestGoalProjectResolver(t *testing.T) {
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 
-	t.Run("should return nil when project not found", func(t *testing.T) {
+	t.Run("should return error when project not found", func(t *testing.T) {
 		goal := &Goal{
 			ID:        "1",
 			Title:     "Test Goal",
@@ -62,8 +62,9 @@ func TestGoalProjectResolver(t *testing.T) {
 
 		project, err := resolver.Project(context.Background(), goal)
 
-		assert.NoError(t, err)
+		assert.Error(t, err)
 		assert.Nil(t, project)
+		assert.Contains(t, err.Error(), "project with ID 999 not found")
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 
@@ -87,7 +88,7 @@ func TestGoalProjectResolver(t *testing.T) {
 	})
 }
 
-func TestGoalContextResolver(t *testing.T) {
+func TestGoalFlowResolver(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
 	defer db.Close()
@@ -96,53 +97,53 @@ func TestGoalContextResolver(t *testing.T) {
 		Resolver: &Resolver{DB: db},
 	}
 
-	t.Run("should return associated context when contextID exists", func(t *testing.T) {
-		contextID := 3
+	t.Run("should return associated flow when flowID exists", func(t *testing.T) {
+		flowID := 3
 		goal := &Goal{
-			ID:        "1",
-			Title:     "Test Goal",
-			ContextID: &contextID,
+			ID:     "1",
+			Title:  "Test Goal",
+			FlowID: &flowID,
 		}
 
 		rows := sqlmock.NewRows([]string{
 			"id", "title", "description", "color", "status", "start_date", "end_date", 
 			"parent_id", "workspace_id", "created_at", "updated_at",
 		}).
-			AddRow(3, "Test Context", "Description", "#FF0000", "active", nil, nil, nil, 1, time.Now(), time.Now())
+			AddRow(3, "Test Flow", "Description", "#FF0000", "active", nil, nil, nil, 1, time.Now(), time.Now())
 
-		mock.ExpectQuery(`SELECT id, title, description, color, status, start_date, end_date, parent_id, workspace_id, created_at, updated_at FROM contexts WHERE id = \$1`).
+		mock.ExpectQuery(`SELECT id, title, description, color, status, start_date, end_date, parent_id, workspace_id, created_at, updated_at FROM flows WHERE id = \$1`).
 			WithArgs(3).
 			WillReturnRows(rows)
 
-		context, err := resolver.Context(context.Background(), goal)
+		flow, err := resolver.Flow(context.Background(), goal)
 
 		assert.NoError(t, err)
-		assert.NotNil(t, context)
-		assert.Equal(t, "3", context.ID)
-		assert.Equal(t, "Test Context", context.Title)
-		assert.Equal(t, "#FF0000", context.Color)
+		assert.NotNil(t, flow)
+		assert.Equal(t, "3", flow.ID)
+		assert.Equal(t, "Test Flow", flow.Title)
+		assert.Equal(t, "#FF0000", flow.Color)
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 
-	t.Run("should return nil when contextID is nil", func(t *testing.T) {
+	t.Run("should return nil when flowID is nil", func(t *testing.T) {
 		goal := &Goal{
-			ID:        "1",
-			Title:     "Test Goal",
-			ContextID: nil,
+			ID:     "1",
+			Title:  "Test Goal",
+			FlowID: nil,
 		}
 
-		context, err := resolver.Context(context.Background(), goal)
+		flow, err := resolver.Flow(context.Background(), goal)
 
 		assert.NoError(t, err)
-		assert.Nil(t, context)
+		assert.Nil(t, flow)
 	})
 
-	t.Run("should return nil when context not found", func(t *testing.T) {
-		contextID := 999
+	t.Run("should return nil when flow not found", func(t *testing.T) {
+		flowID := 999
 		goal := &Goal{
-			ID:        "1",
-			Title:     "Test Goal",
-			ContextID: &contextID,
+			ID:     "1",
+			Title:  "Test Goal",
+			FlowID: &flowID,
 		}
 
 		rows := sqlmock.NewRows([]string{
@@ -150,14 +151,14 @@ func TestGoalContextResolver(t *testing.T) {
 			"parent_id", "workspace_id", "created_at", "updated_at",
 		})
 
-		mock.ExpectQuery(`SELECT id, title, description, color, status, start_date, end_date, parent_id, workspace_id, created_at, updated_at FROM contexts WHERE id = \$1`).
+		mock.ExpectQuery(`SELECT id, title, description, color, status, start_date, end_date, parent_id, workspace_id, created_at, updated_at FROM flows WHERE id = \$1`).
 			WithArgs(999).
 			WillReturnRows(rows)
 
-		context, err := resolver.Context(context.Background(), goal)
+		flow, err := resolver.Flow(context.Background(), goal)
 
 		assert.NoError(t, err)
-		assert.Nil(t, context)
+		assert.Nil(t, flow)
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }

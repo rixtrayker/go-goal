@@ -20,7 +20,7 @@ class GlobalSearch {
       'projects': { name: 'Projects', icon: '📁', color: '#3b82f6' },
       'goals': { name: 'Goals', icon: '🎯', color: '#8b5cf6' },
       'tasks': { name: 'Tasks', icon: '✓', color: '#10b981' },
-      'contexts': { name: 'Contexts', icon: '🌈', color: '#f59e0b' },
+      'flows': { name: 'Flows', icon: '🌈', color: '#f59e0b' },
       'tags': { name: 'Tags', icon: '🏷️', color: '#ef4444' },
       'notes': { name: 'Notes', icon: '📝', color: '#6b7280' }
     };
@@ -221,39 +221,57 @@ class GlobalSearch {
   }
 
   async fetchSearchResults(query) {
-    const requests = [];
-    const searchParams = new URLSearchParams({
-      q: query,
-      limit: 20
-    });
-
-    if (this.currentScope === 'all') {
-      // Search all endpoints
-      requests.push(
-        fetch(`/api/v1/projects?${searchParams}`).then(r => r.json()).then(data => ({ type: 'projects', data })),
-        fetch(`/api/v1/goals?${searchParams}`).then(r => r.json()).then(data => ({ type: 'goals', data })),
-        fetch(`/api/v1/tasks?${searchParams}`).then(r => r.json()).then(data => ({ type: 'tasks', data })),
-        fetch(`/api/v1/contexts?${searchParams}`).then(r => r.json()).then(data => ({ type: 'contexts', data })),
-        fetch(`/api/v1/notes?${searchParams}`).then(r => r.json()).then(data => ({ type: 'notes', data })),
-        fetch(`/api/v1/tags?${searchParams}`).then(r => r.json()).then(data => ({ type: 'tags', data }))
-      );
-    } else {
-      // Search specific scope
-      requests.push(
-        fetch(`/api/v1/${this.currentScope}?${searchParams}`).then(r => r.json()).then(data => ({ type: this.currentScope, data }))
-      );
-    }
-
-    const responses = await Promise.allSettled(requests);
     const results = [];
 
-    responses.forEach(response => {
-      if (response.status === 'fulfilled') {
-        const { type, data } = response.value;
-        const filteredData = this.filterAndRankResults(data, query, type);
-        results.push(...filteredData.map(item => ({ ...item, type })));
+    try {
+      if (this.currentScope === 'all') {
+        // Search all types using GraphQL API client
+        const promises = [
+          window.apiClient.getProjects().then(data => ({ type: 'projects', data })),
+          window.apiClient.getGoals().then(data => ({ type: 'goals', data })),
+          window.apiClient.getTasks().then(data => ({ type: 'tasks', data })),
+          window.apiClient.getFlows().then(data => ({ type: 'flows', data })),
+          window.apiClient.getTags().then(data => ({ type: 'tags', data }))
+        ];
+
+        const responses = await Promise.allSettled(promises);
+        
+        responses.forEach(response => {
+          if (response.status === 'fulfilled') {
+            const { type, data } = response.value;
+            const filteredData = this.filterAndRankResults(data, query, type);
+            results.push(...filteredData.map(item => ({ ...item, type })));
+          }
+        });
+      } else {
+        // Search specific scope
+        let data = [];
+        
+        switch (this.currentScope) {
+          case 'projects':
+            data = await window.apiClient.getProjects();
+            break;
+          case 'goals':
+            data = await window.apiClient.getGoals();
+            break;
+          case 'tasks':
+            data = await window.apiClient.getTasks();
+            break;
+          case 'flows':
+            data = await window.apiClient.getFlows();
+            break;
+          case 'tags':
+            data = await window.apiClient.getTags();
+            break;
+        }
+        
+        const filteredData = this.filterAndRankResults(data, query, this.currentScope);
+        results.push(...filteredData.map(item => ({ ...item, type: this.currentScope })));
       }
-    });
+    } catch (error) {
+      console.error('Search failed:', error);
+      window.errorHandler?.show('Search failed', 'error');
+    }
 
     return this.sortResultsByRelevance(results, query);
   }
@@ -411,7 +429,7 @@ class GlobalSearch {
       projects: '/projects',
       goals: '/goals',
       tasks: '/tasks',
-      contexts: '/contexts',
+      flows: '/flows',
       notes: '/notes',
       tags: '/tags'
     };

@@ -510,6 +510,25 @@ class APIClient {
     return result.deleteTag;
   }
 
+  // Flows API
+  async getFlows(workspaceId = null) {
+    const query = `
+      query GetFlows($workspaceId: Int) {
+        flows(workspaceId: $workspaceId) {
+          id
+          name
+          description
+          color
+          workspaceId
+          createdAt
+          updatedAt
+        }
+      }
+    `;
+    const result = await this.query(query, { workspaceId });
+    return result.flows;
+  }
+
   // Dashboard API
   async getDashboard(workspaceId = null) {
     const query = `
