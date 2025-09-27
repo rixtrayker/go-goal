@@ -54,6 +54,7 @@ Unlike rigid project management tools, Go Goal allows flexible connections betwe
 ### Flow-Driven Organization ( context-Driven)
 
 Go Goal introduces "Life Flows" for thematic organization with color-coded visualization, helping users see their work across different life areas (career, health, learning, etc.) in one unified view.
+look here : "./FLOWS.md"
 
 ### Local-First with Web Interface
 
