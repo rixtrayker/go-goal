@@ -2,13 +2,13 @@
 
 ## Tasks
 
-- [ ] 1. Implement Missing GraphQL Goal Query Resolvers
-  - [ ] 1.1 Write tests for Goals and Goal query resolvers
-  - [ ] 1.2 Implement `goals(projectId: Int)` query resolver with database queries
-  - [ ] 1.3 Implement `goal(id: ID!)` query resolver with proper ID validation
-  - [ ] 1.4 Add error handling for database failures and not found cases
-  - [ ] 1.5 Test GraphQL playground queries to verify resolver functionality
-  - [ ] 1.6 Verify all resolver tests pass
+- [x] 1. Implement Missing GraphQL Goal Query Resolvers
+  - [x] 1.1 Write tests for Goals and Goal query resolvers
+  - [x] 1.2 Implement `goals(projectId: Int)` query resolver with database queries
+  - [x] 1.3 Implement `goal(id: ID!)` query resolver with proper ID validation
+  - [x] 1.4 Add error handling for database failures and not found cases
+  - [x] 1.5 Test GraphQL playground queries to verify resolver functionality
+  - [x] 1.6 Verify all resolver tests pass
 
 - [ ] 2. Implement Missing GraphQL Goal Relationship Resolvers  
   - [ ] 2.1 Write tests for all Goal field resolvers (project, context, tasks, tags, notes)
