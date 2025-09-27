@@ -106,11 +106,11 @@ func (h *WebHandler) Workspaces(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *WebHandler) Contexts(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) Flows(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Title string
 	}{
-		Title: "Contexts",
+		Title: "Flows",
 	}
 	
 	if err := h.templates.ExecuteTemplate(w, "layout.html", data); err != nil {
