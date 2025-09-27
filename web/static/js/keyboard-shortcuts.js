@@ -265,7 +265,12 @@ class KeyboardShortcuts {
     this.registerShortcut('cmd+2', () => this.navigateTo('/projects'), 'Go to Projects', 'navigation');
     this.registerShortcut('cmd+3', () => this.navigateTo('/goals'), 'Go to Goals', 'navigation');
     this.registerShortcut('cmd+4', () => this.navigateTo('/tasks'), 'Go to Tasks', 'navigation');
-    this.registerShortcut('cmd+5', () => this.navigateTo('/contexts'), 'Go to Contexts', 'navigation');
+    this.registerShortcut(
+      "cmd+5",
+      () => this.navigateTo("/flows"),
+      "Go to Flows",
+      "navigation"
+    );
 
     // Search shortcuts
     this.registerShortcut('cmd+k', () => globalSearch.toggle(), 'Open Global Search', 'search');
@@ -285,7 +290,12 @@ class KeyboardShortcuts {
     this.registerSequence(['g', 'p'], () => this.navigateTo('/projects'), 'Go to Projects', 'navigation');
     this.registerSequence(['g', 'g'], () => this.navigateTo('/goals'), 'Go to Goals', 'navigation');
     this.registerSequence(['g', 't'], () => this.navigateTo('/tasks'), 'Go to Tasks', 'navigation');
-    this.registerSequence(['g', 'c'], () => this.navigateTo('/contexts'), 'Go to Contexts', 'navigation');
+    this.registerSequence(
+      ["g", "c"],
+      () => this.navigateTo("/flows"),
+      "Go to Flows",
+      "navigation"
+    );
   }
 
   navigateTo(path) {
@@ -301,10 +311,10 @@ class KeyboardShortcuts {
       window.location.href = '/goals/new';
     } else if (path.includes('tasks')) {
       window.location.href = '/tasks/new';
-    } else if (path.includes('contexts')) {
-      // Trigger context creation modal
-      if (window.createContextModal) {
-        window.createContextModal();
+    } else if (path.includes('flows')) {
+      // Trigger flow creation modal
+      if (window.createFlowModal) {
+        window.createFlowModal();
       }
     } else {
       this.quickCreateMenu();

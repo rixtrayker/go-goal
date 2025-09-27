@@ -140,114 +140,178 @@ class App {
 
   setupRoutes() {
     // Dashboard
-    window.router.addRoute('/', async () => {
-      const dashboardPage = new DashboardPage(this.mainContainer);
-      await dashboardPage.render();
-    }, { title: 'Dashboard - همة' });
+    window.router.addRoute(
+      "/",
+      async () => {
+        const dashboardPage = new DashboardPage(this.mainContainer);
+        await dashboardPage.render();
+      },
+      { title: "Dashboard - همة" }
+    );
 
     // Projects routes
-    window.router.addRoute('/projects', async () => {
-      const projectsPage = new ProjectsPage(this.mainContainer);
-      await projectsPage.render();
-    }, { title: 'Projects - همة' });
+    window.router.addRoute(
+      "/projects",
+      async () => {
+        const projectsPage = new ProjectsPage(this.mainContainer);
+        await projectsPage.render();
+      },
+      { title: "Projects - همة" }
+    );
 
-    window.router.addRoute('/projects/new', async () => {
-      const projectsPage = new ProjectsPage(this.mainContainer);
-      await projectsPage.render({ action: 'new' });
-    }, { title: 'New Project - همة' });
+    window.router.addRoute(
+      "/projects/new",
+      async () => {
+        const projectsPage = new ProjectsPage(this.mainContainer);
+        await projectsPage.render({ action: "new" });
+      },
+      { title: "New Project - همة" }
+    );
 
-    window.router.addRoute('/projects/:id', async (params) => {
-      const projectsPage = new ProjectsPage(this.mainContainer);
-      await projectsPage.render({ id: params.id });
-    }, { title: 'Project Details - همة' });
+    window.router.addRoute(
+      "/projects/:id",
+      async (params) => {
+        const projectsPage = new ProjectsPage(this.mainContainer);
+        await projectsPage.render({ id: params.id });
+      },
+      { title: "Project Details - همة" }
+    );
 
-    window.router.addRoute('/projects/:id/edit', async (params) => {
-      const projectsPage = new ProjectsPage(this.mainContainer);
-      await projectsPage.render({ id: params.id, action: 'edit' });
-    }, { title: 'Edit Project - همة' });
+    window.router.addRoute(
+      "/projects/:id/edit",
+      async (params) => {
+        const projectsPage = new ProjectsPage(this.mainContainer);
+        await projectsPage.render({ id: params.id, action: "edit" });
+      },
+      { title: "Edit Project - همة" }
+    );
 
     // Tasks routes
-    window.router.addRoute('/tasks', async () => {
-      const tasksPage = new TasksPage(this.mainContainer);
-      await tasksPage.render();
-    }, { title: 'Tasks - همة' });
+    window.router.addRoute(
+      "/tasks",
+      async () => {
+        const tasksPage = new TasksPage(this.mainContainer);
+        await tasksPage.render();
+      },
+      { title: "Tasks - همة" }
+    );
 
-    window.router.addRoute('/tasks/new', async () => {
-      const tasksPage = new TasksPage(this.mainContainer);
-      await tasksPage.render({ action: 'new' });
-    }, { title: 'New Task - همة' });
+    window.router.addRoute(
+      "/tasks/new",
+      async () => {
+        const tasksPage = new TasksPage(this.mainContainer);
+        await tasksPage.render({ action: "new" });
+      },
+      { title: "New Task - همة" }
+    );
 
-    window.router.addRoute('/tasks/:id', async (params) => {
-      const tasksPage = new TasksPage(this.mainContainer);
-      await tasksPage.render({ id: params.id });
-    }, { title: 'Task Details - همة' });
+    window.router.addRoute(
+      "/tasks/:id",
+      async (params) => {
+        const tasksPage = new TasksPage(this.mainContainer);
+        await tasksPage.render({ id: params.id });
+      },
+      { title: "Task Details - همة" }
+    );
 
-    window.router.addRoute('/tasks/:id/edit', async (params) => {
-      const tasksPage = new TasksPage(this.mainContainer);
-      await tasksPage.render({ id: params.id, action: 'edit' });
-    }, { title: 'Edit Task - همة' });
+    window.router.addRoute(
+      "/tasks/:id/edit",
+      async (params) => {
+        const tasksPage = new TasksPage(this.mainContainer);
+        await tasksPage.render({ id: params.id, action: "edit" });
+      },
+      { title: "Edit Task - همة" }
+    );
 
     // Goals routes (placeholder for future implementation)
-    window.router.addRoute('/goals', async () => {
-      this.mainContainer.innerHTML = `
+    window.router.addRoute(
+      "/goals",
+      async () => {
+        this.mainContainer.innerHTML = `
         <div class="page-placeholder">
           <h1>Goals</h1>
           <p>Goals management coming soon!</p>
           <button class="btn btn-primary" onclick="router.navigate('/')">Back to Dashboard</button>
         </div>
       `;
-    }, { title: 'Goals - همة' });
+      },
+      { title: "Goals - همة" }
+    );
 
-    // Contexts routes (placeholder for future implementation)
-    window.router.addRoute('/contexts', async () => {
-      this.mainContainer.innerHTML = `
+    // Flows routes (placeholder for future implementation)
+    window.router.addRoute(
+      "/flows",
+      async () => {
+        this.mainContainer.innerHTML = `
         <div class="page-placeholder">
-          <h1>Contexts</h1>
-          <p>Context management coming soon!</p>
+          <h1>Flows</h1>
+          <p>Flow management coming soon!</p>
           <button class="btn btn-primary" onclick="router.navigate('/')">Back to Dashboard</button>
         </div>
       `;
-    }, { title: 'Contexts - همة' });
+      },
+      { title: "Flows - همة" }
+    );
 
     // Tags routes
-    window.router.addRoute('/tags', async () => {
-      const tagsPage = new TagsPage(this.mainContainer);
-      await tagsPage.render();
-    }, { title: 'Tags - همة' });
+    window.router.addRoute(
+      "/tags",
+      async () => {
+        const tagsPage = new TagsPage(this.mainContainer);
+        await tagsPage.render();
+      },
+      { title: "Tags - همة" }
+    );
 
-    window.router.addRoute('/tags/new', async () => {
-      const tagsPage = new TagsPage(this.mainContainer);
-      await tagsPage.render({ action: 'new' });
-    }, { title: 'New Tag - همة' });
+    window.router.addRoute(
+      "/tags/new",
+      async () => {
+        const tagsPage = new TagsPage(this.mainContainer);
+        await tagsPage.render({ action: "new" });
+      },
+      { title: "New Tag - همة" }
+    );
 
-    window.router.addRoute('/tags/:id/edit', async (params) => {
-      const tagsPage = new TagsPage(this.mainContainer);
-      await tagsPage.render({ id: params.id, action: 'edit' });
-    }, { title: 'Edit Tag - همة' });
+    window.router.addRoute(
+      "/tags/:id/edit",
+      async (params) => {
+        const tagsPage = new TagsPage(this.mainContainer);
+        await tagsPage.render({ id: params.id, action: "edit" });
+      },
+      { title: "Edit Tag - همة" }
+    );
 
     // Notes routes (placeholder for future implementation)
-    window.router.addRoute('/notes', async () => {
-      this.mainContainer.innerHTML = `
+    window.router.addRoute(
+      "/notes",
+      async () => {
+        this.mainContainer.innerHTML = `
         <div class="page-placeholder">
           <h1>Notes</h1>
           <p>Note management coming soon!</p>
           <button class="btn btn-primary" onclick="router.navigate('/')">Back to Dashboard</button>
         </div>
       `;
-    }, { title: 'Notes - همة' });
+      },
+      { title: "Notes - همة" }
+    );
 
     // Settings routes (placeholder for future implementation)
-    window.router.addRoute('/settings', async () => {
-      this.mainContainer.innerHTML = `
+    window.router.addRoute(
+      "/settings",
+      async () => {
+        this.mainContainer.innerHTML = `
         <div class="page-placeholder">
           <h1>Settings</h1>
           <p>Settings page coming soon!</p>
           <button class="btn btn-primary" onclick="router.navigate('/')">Back to Dashboard</button>
         </div>
       `;
-    }, { title: 'Settings - همة' });
+      },
+      { title: "Settings - همة" }
+    );
 
-    appConfig.log('Routes configured');
+    appConfig.log("Routes configured");
   }
 
   async finalizeInitialization() {
@@ -339,7 +403,16 @@ class App {
     document.addEventListener('keydown', (e) => {
       if (e.altKey && e.key >= '1' && e.key <= '9') {
         e.preventDefault();
-        const routes = ['/', '/projects', '/tasks', '/goals', '/contexts', '/tags', '/notes', '/settings'];
+        const routes = [
+          "/",
+          "/projects",
+          "/tasks",
+          "/goals",
+          "/flows",
+          "/tags",
+          "/notes",
+          "/settings",
+        ];
         const routeIndex = parseInt(e.key) - 1;
         if (routes[routeIndex]) {
           window.router.navigate(routes[routeIndex]);

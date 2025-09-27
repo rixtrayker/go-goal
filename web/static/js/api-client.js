@@ -127,7 +127,7 @@ class APIClient {
           description
           status
           workspaceId
-          contextId
+          flowId
           createdAt
           updatedAt
         }
@@ -146,7 +146,7 @@ class APIClient {
           description
           status
           workspaceId
-          contextId
+          flowId
           createdAt
           updatedAt
           goals {
@@ -179,7 +179,7 @@ class APIClient {
           description
           status
           workspaceId
-          contextId
+          flowId
           createdAt
           updatedAt
         }
@@ -198,7 +198,7 @@ class APIClient {
           description
           status
           workspaceId
-          contextId
+          flowId
           createdAt
           updatedAt
         }
@@ -230,7 +230,7 @@ class APIClient {
           dueDate
           status
           projectId
-          contextId
+          flowId
           createdAt
           updatedAt
         }
@@ -251,7 +251,7 @@ class APIClient {
           dueDate
           status
           projectId
-          contextId
+          flowId
           createdAt
           updatedAt
           tasks {
@@ -284,7 +284,7 @@ class APIClient {
           dueDate
           status
           projectId
-          contextId
+          flowId
           createdAt
           updatedAt
         }
@@ -305,7 +305,7 @@ class APIClient {
           dueDate
           status
           projectId
-          contextId
+          flowId
           createdAt
           updatedAt
         }
@@ -339,7 +339,7 @@ class APIClient {
           dueDate
           goalId
           projectId
-          contextId
+          flowId
           createdAt
           updatedAt
         }
@@ -361,7 +361,7 @@ class APIClient {
           dueDate
           goalId
           projectId
-          contextId
+          flowId
           createdAt
           updatedAt
           goal {
@@ -393,7 +393,7 @@ class APIClient {
           dueDate
           goalId
           projectId
-          contextId
+          flowId
           createdAt
           updatedAt
         }
@@ -415,7 +415,7 @@ class APIClient {
           dueDate
           goalId
           projectId
-          contextId
+          flowId
           createdAt
           updatedAt
         }
