@@ -2,120 +2,51 @@ package api
 
 import (
 	"encoding/json"
-	"html/template"
 	"net/http"
-	"path/filepath"
 
 	"go-goal/pkg/config"
 )
 
 type WebHandler struct {
-	templates *template.Template
-	config    *config.Config
+	config *config.Config
 }
 
 func NewWebHandler(cfg *config.Config) *WebHandler {
-	templates := template.Must(template.ParseGlob(filepath.Join("web", "templates", "*.html")))
 	return &WebHandler{
-		templates: templates,
-		config:    cfg,
+		config: cfg,
 	}
 }
 
 func (h *WebHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Title string
-	}{
-		Title: "Dashboard",
-	}
-	
-	if err := h.templates.ExecuteTemplate(w, "layout.html", data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	http.ServeFile(w, r, "web/index.html")
 }
 
 func (h *WebHandler) Projects(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Title string
-	}{
-		Title: "Projects",
-	}
-	
-	if err := h.templates.ExecuteTemplate(w, "layout.html", data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	http.ServeFile(w, r, "web/index.html")
 }
 
 func (h *WebHandler) Goals(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Title string
-	}{
-		Title: "Goals",
-	}
-	
-	if err := h.templates.ExecuteTemplate(w, "layout.html", data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	http.ServeFile(w, r, "web/index.html")
 }
 
 func (h *WebHandler) Tasks(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Title string
-	}{
-		Title: "Tasks",
-	}
-	
-	if err := h.templates.ExecuteTemplate(w, "layout.html", data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	http.ServeFile(w, r, "web/index.html")
 }
 
 func (h *WebHandler) Tags(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Title string
-	}{
-		Title: "Tags",
-	}
-	
-	if err := h.templates.ExecuteTemplate(w, "layout.html", data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	http.ServeFile(w, r, "web/index.html")
 }
 
 func (h *WebHandler) Notes(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Title string
-	}{
-		Title: "Notes",
-	}
-	
-	if err := h.templates.ExecuteTemplate(w, "layout.html", data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	http.ServeFile(w, r, "web/index.html")
 }
 
 func (h *WebHandler) Workspaces(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Title string
-	}{
-		Title: "Workspaces",
-	}
-	
-	if err := h.templates.ExecuteTemplate(w, "layout.html", data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	http.ServeFile(w, r, "web/index.html")
 }
 
 func (h *WebHandler) Flows(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Title string
-	}{
-		Title: "Flows",
-	}
-	
-	if err := h.templates.ExecuteTemplate(w, "layout.html", data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	http.ServeFile(w, r, "web/index.html")
 }
 
 // AppConfig returns the application configuration for the frontend
