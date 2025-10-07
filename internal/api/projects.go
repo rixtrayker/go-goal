@@ -16,13 +16,27 @@ type ProjectHandler struct {
 }
 
 func (h *ProjectHandler) GetProjects(w http.ResponseWriter, r *http.Request) {
-	rows, err := h.DB.Query(`
-		SELECT id, title, description, status, workspace_id, created_at, updated_at 
-		FROM projects 
-		ORDER BY created_at DESC
-	`)
+	// Parse filter parameters
+	criteria := ParseFilterParams(r)
+	
+	// Validate filter parameters
+	if err := ValidateFilterParams(criteria, "project"); err != nil {
+		http.Error(w, "Invalid filter parameters: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Build filtered query
+	baseQuery := "SELECT id, title, description, status, workspace_id, flow_id, created_at, updated_at FROM projects"
+	qb := NewQueryBuilder(baseQuery)
+	if err := qb.WithFilters(criteria, "project"); err != nil {
+		http.Error(w, "Failed to build query: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Execute query with count
+	rows, count, err := FilteredQueryWithCount(h.DB, baseQuery, criteria, "project")
 	if err != nil {
-		http.Error(w, "Failed to fetch projects", http.StatusInternalServerError)
+		http.Error(w, "Failed to fetch projects: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -30,7 +44,7 @@ func (h *ProjectHandler) GetProjects(w http.ResponseWriter, r *http.Request) {
 	var projects []models.Project
 	for rows.Next() {
 		var p models.Project
-		err := rows.Scan(&p.ID, &p.Title, &p.Description, &p.Status, &p.WorkspaceID, &p.CreatedAt, &p.UpdatedAt)
+		err := rows.Scan(&p.ID, &p.Title, &p.Description, &p.Status, &p.WorkspaceID, &p.FlowID, &p.CreatedAt, &p.UpdatedAt)
 		if err != nil {
 			http.Error(w, "Failed to scan project", http.StatusInternalServerError)
 			return
@@ -38,8 +52,11 @@ func (h *ProjectHandler) GetProjects(w http.ResponseWriter, r *http.Request) {
 		projects = append(projects, p)
 	}
 
+	// Create response with metadata
+	response := NewFilterResponse(projects, count, criteria)
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(projects)
+	json.NewEncoder(w).Encode(response)
 }
 
 func (h *ProjectHandler) GetProject(w http.ResponseWriter, r *http.Request) {
