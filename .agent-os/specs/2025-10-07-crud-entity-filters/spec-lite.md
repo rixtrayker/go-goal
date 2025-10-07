@@ -1,0 +1,3 @@
+# Spec Summary (Lite)
+
+Implement comprehensive filtering capabilities for all main CRUD endpoints (Projects, Tasks, Goals, Flows, Notes, Tags) with both backend API support and frontend UI components. This feature will enhance user productivity by enabling efficient data discovery and organization across all entity types, including support for complex filter combinations, saved presets, and cross-entity relationship filtering.
