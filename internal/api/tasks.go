@@ -16,13 +16,30 @@ type TaskHandler struct {
 }
 
 func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
-	rows, err := h.DB.Query(`
-		SELECT id, title, description, goal_id, project_id, status, priority, due_date, created_at, updated_at 
-		FROM tasks 
-		ORDER BY priority DESC, created_at DESC
-	`)
+	// Parse filter parameters
+	criteria := ParseFilterParams(r)
+	
+	// Validate filter parameters
+	if err := ValidateFilterParams(criteria, "task"); err != nil {
+		http.Error(w, "Invalid filter parameters: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Build filtered query
+	baseQuery := "SELECT id, title, description, goal_id, project_id, flow_id, status, priority, due_date, created_at, updated_at FROM tasks"
+	qb := NewQueryBuilder(baseQuery)
+	if err := qb.WithFilters(criteria, "task"); err != nil {
+		http.Error(w, "Failed to build query: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Set default ordering for tasks
+	qb.WithOrderBy("priority DESC, created_at DESC")
+
+	// Execute query with count
+	rows, count, err := FilteredQueryWithCount(h.DB, baseQuery, criteria, "task")
 	if err != nil {
-		http.Error(w, "Failed to fetch tasks", http.StatusInternalServerError)
+		http.Error(w, "Failed to fetch tasks: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -30,7 +47,7 @@ func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 	var tasks []models.Task
 	for rows.Next() {
 		var t models.Task
-		err := rows.Scan(&t.ID, &t.Title, &t.Description, &t.GoalID, &t.ProjectID, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt, &t.UpdatedAt)
+		err := rows.Scan(&t.ID, &t.Title, &t.Description, &t.GoalID, &t.ProjectID, &t.FlowID, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt, &t.UpdatedAt)
 		if err != nil {
 			http.Error(w, "Failed to scan task", http.StatusInternalServerError)
 			return
@@ -38,8 +55,11 @@ func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 		tasks = append(tasks, t)
 	}
 
+	// Create response with metadata
+	response := NewFilterResponse(tasks, count, criteria)
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(tasks)
+	json.NewEncoder(w).Encode(response)
 }
 
 func (h *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
